@@ -20,7 +20,6 @@ async def _fetch_clips_async(config: AppConfig, days_back: int = 7) -> list[Twit
 
     from twitchAPI.twitch import Twitch
 
-    # twitchAPI v4+ auto-authenticates on init (authenticate_app=True by default)
     api = await Twitch(twitch.client_id, twitch.client_secret)
 
     started_at = datetime.now(timezone.utc) - timedelta(days=days_back)
@@ -62,6 +61,7 @@ async def _fetch_vods_async(config: AppConfig, days_back: int = 30) -> list[Twit
         )
 
     from twitchAPI.twitch import Twitch
+    from twitchAPI.type import VideoType
 
     api = await Twitch(twitch.client_id, twitch.client_secret)
 
@@ -70,7 +70,7 @@ async def _fetch_vods_async(config: AppConfig, days_back: int = 30) -> list[Twit
 
     async for video in api.get_videos(
         user_id=twitch.broadcaster_id,
-        video_type="archive",
+        video_type=VideoType.ARCHIVE,
         first=min(twitch.max_vods, 100),
     ):
         created = video.created_at or ""
