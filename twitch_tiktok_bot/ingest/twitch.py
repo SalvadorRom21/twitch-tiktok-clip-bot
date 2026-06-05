@@ -10,6 +10,46 @@ from twitch_tiktok_bot.config import AppConfig
 from twitch_tiktok_bot.models import TwitchClip, TwitchVod
 
 
+def _parse_api_datetime(value: object) -> datetime | None:
+    """Parse Twitch API timestamps (str or datetime) to UTC datetime."""
+    if not value:
+        return None
+    if isinstance(value, datetime):
+        dt = value
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    if isinstance(value, str):
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(
+                timezone.utc
+            )
+        except ValueError:
+            return None
+    return None
+
+
+def _format_api_datetime(value: object) -> str:
+    dt = _parse_api_datetime(value)
+    return dt.isoformat() if dt else ""
+
+
+def _parse_duration_seconds(value: object) -> float:
+    if not value:
+        return 0.0
+    if isinstance(value, (int, float)):
+        return float(value)
+    dur = str(value)
+    h = re.search(r"(\d+)h", dur)
+    m = re.search(r"(\d+)m", dur)
+    s = re.search(r"(\d+)s", dur)
+    return float(
+        (int(h.group(1)) * 3600 if h else 0)
+        + (int(m.group(1)) * 60 if m else 0)
+        + (int(s.group(1)) if s else 0)
+    )
+
+
 async def _fetch_clips_async(config: AppConfig, days_back: int = 7) -> list[TwitchClip]:
     twitch = config.twitch
     if not all([twitch.client_id, twitch.client_secret, twitch.broadcaster_id]):
@@ -73,35 +113,18 @@ async def _fetch_vods_async(config: AppConfig, days_back: int = 30) -> list[Twit
         video_type=VideoType.ARCHIVE,
         first=min(twitch.max_vods, 100),
     ):
-        created = video.created_at or ""
-        if created:
-            try:
-                created_dt = datetime.fromisoformat(created.replace("Z", "+00:00"))
-                if created_dt < started_at:
-                    continue
-            except ValueError:
-                pass
-
-        duration = 0.0
-        if video.duration:
-            dur = video.duration
-            h = re.search(r"(\d+)h", dur)
-            m = re.search(r"(\d+)m", dur)
-            s = re.search(r"(\d+)s", dur)
-            duration = (
-                (int(h.group(1)) * 3600 if h else 0)
-                + (int(m.group(1)) * 60 if m else 0)
-                + (int(s.group(1)) if s else 0)
-            )
+        created_dt = _parse_api_datetime(video.created_at)
+        if created_dt and created_dt < started_at:
+            continue
 
         vods.append(
             TwitchVod(
                 id=video.id,
                 url=video.url or f"https://www.twitch.tv/videos/{video.id}",
                 title=video.title or "",
-                duration_sec=duration,
+                duration_sec=_parse_duration_seconds(video.duration),
                 view_count=video.view_count or 0,
-                created_at=created,
+                created_at=_format_api_datetime(video.created_at),
             )
         )
         if len(vods) >= twitch.max_vods:
