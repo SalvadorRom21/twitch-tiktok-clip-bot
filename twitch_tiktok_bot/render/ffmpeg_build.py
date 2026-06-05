@@ -9,7 +9,11 @@ from pathlib import Path
 
 from twitch_tiktok_bot.config import AppConfig
 from twitch_tiktok_bot.models import ClipAnalysis, EditEffect, EditPlan, EditSegment
-from twitch_tiktok_bot.render.crop import crop_x_expression
+from twitch_tiktok_bot.render.ffmpeg_utils import (
+    ass_filter_path,
+    crop_filter,
+    join_video_filters,
+)
 
 
 def _ffmpeg_bin(config: AppConfig) -> str:
@@ -119,10 +123,8 @@ def _render_segment_clip(
     ffmpeg = _ffmpeg_bin(config)
     render = config.render
     duration = max(0.1, seg.end - seg.start)
-    crop_x = crop_x_expression(face_center_x)
-
     vf_parts = [
-        f"crop=ih*9/16:ih:{crop_x}:0",
+        crop_filter(face_center_x),
         f"scale={render.width}:{render.height}",
     ]
     zoom = _zoom_filter_for_segment(effects, seg, render.width, render.height)
@@ -139,7 +141,7 @@ def _render_segment_clip(
         "-t",
         f"{duration}",
         "-vf",
-        ",".join(vf_parts),
+        join_video_filters(vf_parts),
         "-r",
         str(render.fps),
         "-c:v",
@@ -192,7 +194,7 @@ def _apply_overlays(
     hook = _escape_drawtext(hook_text or "Watch this")
     vf_parts: list[str] = []
     if ass_path and ass_path.exists() and ass_path.stat().st_size > 0:
-        vf_parts.append(f"ass={ass_path}")
+        vf_parts.append(ass_filter_path(ass_path))
     vf_parts.append(
         f"drawtext=text='{hook}':fontsize=64:fontcolor=white:borderw=4:bordercolor=black:"
         f"x=(w-text_w)/2:y=120:enable='between(t,0,2)'"
@@ -203,7 +205,7 @@ def _apply_overlays(
         "-i",
         str(input_path),
         "-vf",
-        ",".join(vf_parts),
+        join_video_filters(vf_parts),
         "-c:v",
         "libx264",
         "-preset",
