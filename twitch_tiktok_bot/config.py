@@ -116,29 +116,49 @@ def _merge_dataclass(cls: type, data: dict[str, Any] | None) -> Any:
     return cls(**{k: v for k, v in data.items() if k in fields})
 
 
+def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    merged = dict(base)
+    for key, value in override.items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = _deep_merge(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
+def _load_yaml_dict(path: Path) -> dict[str, Any]:
+    with path.open(encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
+
+
+def _apply_env_if_empty(data: dict[str, Any], key: str, env_name: str) -> None:
+    if not str(data.get(key, "")).strip():
+        env_val = os.getenv(env_name, "")
+        if env_val:
+            data[key] = env_val
+
+
 def load_config(
     config_path: Path | None = None,
     project_root: Path | None = None,
 ) -> AppConfig:
     load_dotenv()
     root = project_root or Path.cwd()
-    paths_to_try = [
-        config_path,
-        root / "config.local.yaml",
-        root / "config.yaml",
-    ]
-    raw: dict[str, Any] = {}
-    for path in paths_to_try:
-        if path and path.exists():
-            with path.open(encoding="utf-8") as f:
-                raw = yaml.safe_load(f) or {}
-            break
 
-    # Env overrides for Twitch credentials
+    if config_path and config_path.exists():
+        raw = _load_yaml_dict(config_path)
+    else:
+        raw = {}
+        if (root / "config.yaml").exists():
+            raw = _load_yaml_dict(root / "config.yaml")
+        if (root / "config.local.yaml").exists():
+            raw = _deep_merge(raw, _load_yaml_dict(root / "config.local.yaml"))
+
+    # Env overrides for Twitch credentials (fill empty/missing values)
     twitch_raw = dict(raw.get("twitch", {}))
-    twitch_raw.setdefault("client_id", os.getenv("TWITCH_CLIENT_ID", ""))
-    twitch_raw.setdefault("client_secret", os.getenv("TWITCH_CLIENT_SECRET", ""))
-    twitch_raw.setdefault("broadcaster_id", os.getenv("TWITCH_BROADCASTER_ID", ""))
+    _apply_env_if_empty(twitch_raw, "client_id", "TWITCH_CLIENT_ID")
+    _apply_env_if_empty(twitch_raw, "client_secret", "TWITCH_CLIENT_SECRET")
+    _apply_env_if_empty(twitch_raw, "broadcaster_id", "TWITCH_BROADCASTER_ID")
 
     llm_raw = dict(raw.get("llm", {}))
     if os.getenv("OPENAI_API_KEY"):
