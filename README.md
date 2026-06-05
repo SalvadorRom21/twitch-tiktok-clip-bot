@@ -63,8 +63,15 @@ source .venv/bin/activate   # Windows: .venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Copy env template (optional)
+# Add Twitch credentials (pick one method)
+
+# Method A — YAML file (recommended)
+cp config.local.yaml.example config.local.yaml
+# Edit config.local.yaml and paste client_id, client_secret, broadcaster_id
+
+# Method B — .env file
 cp .env.example .env
+# Edit .env and paste TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_BROADCASTER_ID
 
 # Process one clip by URL
 python main.py --clip-url "https://clips.twitch.tv/YourClipSlug"

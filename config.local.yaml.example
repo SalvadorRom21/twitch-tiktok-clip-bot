@@ -1,0 +1,21 @@
+# Copy this file to config.local.yaml and fill in your Twitch credentials.
+#
+#   cp config.local.yaml.example config.local.yaml
+#
+# Get credentials: https://dev.twitch.tv/console/apps
+# OAuth Redirect URL (required by Twitch, not used by this app): http://localhost:3000
+#
+# Find your broadcaster_id (numeric Twitch user ID):
+#   curl -s "https://api.twitch.tv/helix/users?login=YOUR_TWITCH_USERNAME" \
+#     -H "Client-Id: YOUR_CLIENT_ID"
+
+twitch:
+  client_id: "PASTE_CLIENT_ID_HERE"
+  client_secret: "PASTE_CLIENT_SECRET_HERE"
+  broadcaster_id: "PASTE_NUMERIC_USER_ID_HERE"
+  max_clips: 5
+
+# Optional: enable smarter LLM edit plans (requires OPENAI_API_KEY in .env)
+# llm:
+#   enabled: true
+#   model: gpt-4o-mini
