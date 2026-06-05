@@ -16,7 +16,7 @@ fastapi>=0.110.0
 uvicorn>=0.27.0
 
 # Optional: Twitch API
-twitchAPI>=4.0.0
+twitchAPI>=4.0.0,<5.0.0
 
 # Optional: LLM edit planning (OpenAI-compatible)
 openai>=1.30.0

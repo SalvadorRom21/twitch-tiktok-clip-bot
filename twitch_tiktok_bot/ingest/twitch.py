@@ -14,14 +14,14 @@ async def _fetch_clips_async(config: AppConfig, days_back: int = 7) -> list[Twit
     twitch = config.twitch
     if not all([twitch.client_id, twitch.client_secret, twitch.broadcaster_id]):
         raise ValueError(
-            "Twitch credentials missing. Set client_id, client_secret, and broadcaster_id "
-            "in config.yaml or TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET / TWITCH_BROADCASTER_ID."
+            "Twitch credentials missing. Copy config.local.yaml.example to config.local.yaml "
+            "and set client_id, client_secret, and broadcaster_id."
         )
 
     from twitchAPI.twitch import Twitch
 
+    # twitchAPI v4+ auto-authenticates on init (authenticate_app=True by default)
     api = await Twitch(twitch.client_id, twitch.client_secret)
-    await api.set_app_authentication()
 
     started_at = datetime.now(timezone.utc) - timedelta(days=days_back)
     clips: list[TwitchClip] = []
@@ -57,13 +57,13 @@ async def _fetch_vods_async(config: AppConfig, days_back: int = 30) -> list[Twit
     twitch = config.twitch
     if not all([twitch.client_id, twitch.client_secret, twitch.broadcaster_id]):
         raise ValueError(
-            "Twitch credentials missing. Set client_id, client_secret, and broadcaster_id."
+            "Twitch credentials missing. Copy config.local.yaml.example to config.local.yaml "
+            "and set client_id, client_secret, and broadcaster_id."
         )
 
     from twitchAPI.twitch import Twitch
 
     api = await Twitch(twitch.client_id, twitch.client_secret)
-    await api.set_app_authentication()
 
     started_at = datetime.now(timezone.utc) - timedelta(days=days_back)
     vods: list[TwitchVod] = []
