@@ -7,6 +7,7 @@ import threading
 import uuid
 
 from twitch_tiktok_bot.config import AppConfig
+from twitch_tiktok_bot.ingest.vod import is_vod_url
 from twitch_tiktok_bot.status import ClipJob, ClipStatus, load_job, save_job
 
 
@@ -15,29 +16,45 @@ _active_threads: dict[str, threading.Thread] = {}
 
 
 def _run_job(config: AppConfig, job: ClipJob) -> None:
-    from twitch_tiktok_bot.pipeline import process_clip_url
+    from twitch_tiktok_bot.pipeline import process_media_url
 
     try:
-        output = process_clip_url(
+        outputs = process_media_url(
             url=job.clip_url,
             config=config,
-            clip_id=job.id,
-            clip_title=job.title,
+            media_id=job.id,
+            title=job.title,
         )
-        plan_path = config.resolve_path(config.paths.data_dir) / job.id / "edit_plan.json"
-        analysis_path = config.resolve_path(config.paths.data_dir) / job.id / "analysis.json"
-        plan_data = json.loads(plan_path.read_text(encoding="utf-8")) if plan_path.exists() else {}
+        work_dir = config.resolve_path(config.paths.data_dir) / job.id
+        analysis_path = work_dir / "analysis.json"
         analysis_data = (
-            json.loads(analysis_path.read_text(encoding="utf-8")) if analysis_path.exists() else {}
+            json.loads(analysis_path.read_text(encoding="utf-8"))
+            if analysis_path.exists()
+            else {}
         )
 
+        first = outputs[0]
+        caption = first.with_suffix(".txt")
+        summary_path = work_dir / "job_summary.json"
+        hook_text = job.title
+        hashtags: list[str] = []
+        if summary_path.exists():
+            summary = json.loads(summary_path.read_text(encoding="utf-8"))
+
+        # Read hook from first short caption file
+        if caption.exists():
+            lines = caption.read_text(encoding="utf-8").splitlines()
+            hook_text = lines[0] if lines else hook_text
+
         job.status = ClipStatus.READY
-        job.output_video = str(output)
-        job.caption_file = str(output.with_suffix(".txt"))
-        job.hook_text = plan_data.get("hook_text", "")
-        job.hashtags = list(plan_data.get("hashtags", []))
-        job.segment_count = len(plan_data.get("segments", []))
+        job.output_video = str(first)
+        job.caption_file = str(caption)
+        job.hook_text = hook_text
+        job.hashtags = hashtags
+        job.segment_count = len(outputs)
         job.face_crop_center_x = analysis_data.get("face_crop_center_x")
+        job.source_type = "vod" if is_vod_url(job.clip_url) else "clip"
+        job.output_videos = [str(p) for p in outputs]
         job.error = ""
     except Exception as exc:  # noqa: BLE001 — surface pipeline errors to UI
         job.status = ClipStatus.FAILED
@@ -57,6 +74,7 @@ def start_job(
         clip_url=clip_url,
         title=title,
         status=ClipStatus.PROCESSING,
+        source_type="vod" if is_vod_url(clip_url) else "clip",
     )
     save_job(config, job)
 

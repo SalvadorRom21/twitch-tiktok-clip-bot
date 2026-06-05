@@ -135,8 +135,8 @@
   <main>
     <section class="panel stack">
       <div>
-        <label for="clipUrl">Twitch clip URL</label>
-        <input id="clipUrl" placeholder="https://clips.twitch.tv/..." />
+        <label for="clipUrl">Twitch clip or VOD URL</label>
+        <input id="clipUrl" placeholder="https://clips.twitch.tv/... or https://www.twitch.tv/videos/..." />
       </div>
       <div>
         <label for="clipTitle">Title (optional)</label>
@@ -206,9 +206,13 @@
       for (const clip of clips) {
         const el = document.createElement("div");
         el.className = "clip-item" + (clip.id === selectedId ? " active" : "");
+        const typeLabel = clip.source_type === "vod" ? "VOD" : "clip";
+        const segLabel = clip.source_type === "vod"
+          ? `${clip.segment_count || 0} shorts`
+          : `${clip.segment_count || 0} segments`;
         el.innerHTML = `
           <h3>${clip.title || clip.id}</h3>
-          <div class="meta">${clip.segment_count || 0} segments · ${clip.status}</div>
+          <div class="meta">${typeLabel} · ${segLabel} · ${clip.status}</div>
           <span class="${badgeClass(clip.status)}">${clip.status}</span>
         `;
         el.onclick = () => selectClip(clip.id);
@@ -230,7 +234,13 @@
       const face = clip.face_crop_center_x != null
         ? `Face crop: ${(clip.face_crop_center_x * 100).toFixed(0)}%`
         : "Face crop: center";
-      clipMeta.textContent = `${face} · ${clip.segment_count || 0} montage segments`;
+      const shortsInfo = clip.source_type === "vod"
+        ? `${clip.segment_count || 0} TikTok shorts from stream`
+        : `${clip.segment_count || 0} montage segments`;
+      clipMeta.textContent = `${face} · ${shortsInfo}`;
+      if (clip.output_videos && clip.output_videos.length > 1) {
+        clipMeta.textContent += ` · showing short 1 of ${clip.output_videos.length}`;
+      }
       if (clip.status === "ready" || clip.status === "approved" || clip.status === "rejected") {
         player.src = `/api/clips/${id}/video?ts=${Date.now()}`;
       } else {

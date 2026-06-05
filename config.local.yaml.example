@@ -14,6 +14,13 @@ twitch:
   client_secret: "PASTE_CLIENT_SECRET_HERE"
   broadcaster_id: "PASTE_NUMERIC_USER_ID_HERE"
   max_clips: 5
+  max_vods: 3
+
+vod:
+  max_shorts_per_vod: 5
+  min_short_gap_sec: 120
+  # Set to 3600 to only download/process first hour while testing
+  max_download_sec: 0
 
 # Optional: enable smarter LLM edit plans (requires OPENAI_API_KEY in .env)
 # llm:

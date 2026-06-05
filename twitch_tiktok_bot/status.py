@@ -35,6 +35,8 @@ class ClipJob:
     hashtags: list[str] = field(default_factory=list)
     segment_count: int = 0
     face_crop_center_x: float | None = None
+    source_type: str = "clip"  # clip | vod
+    output_videos: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
@@ -82,6 +84,8 @@ def load_job(config: AppConfig, clip_id: str) -> ClipJob | None:
         hashtags=list(data.get("hashtags", [])),
         segment_count=int(data.get("segment_count", 0)),
         face_crop_center_x=data.get("face_crop_center_x"),
+        source_type=data.get("source_type", "clip"),
+        output_videos=list(data.get("output_videos", [])),
     )
 
 

@@ -162,3 +162,13 @@ class TwitchClip:
     game_name: str = ""
     view_count: int = 0
     created_at: str = ""
+
+
+@dataclass
+class TwitchVod:
+    id: str
+    url: str
+    title: str
+    duration_sec: float = 0.0
+    view_count: int = 0
+    created_at: str = ""

@@ -8,26 +8,46 @@ import sys
 from pathlib import Path
 
 from twitch_tiktok_bot.config import load_config
-from twitch_tiktok_bot.ingest.twitch import fetch_recent_clips
-from twitch_tiktok_bot.pipeline import process_clip_url, process_twitch_clip
+from twitch_tiktok_bot.ingest.twitch import fetch_recent_clips, fetch_recent_vods
+from twitch_tiktok_bot.pipeline import (
+    process_clip_url,
+    process_media_url,
+    process_twitch_clip,
+    process_twitch_vod,
+    process_vod_url,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Download Twitch clips, analyze them, and render TikTok shorts.",
+        description="Download Twitch clips/VODs, analyze them, and render TikTok shorts.",
     )
     parser.add_argument(
         "--clip-url",
         help="Process a single Twitch clip URL",
     )
     parser.add_argument(
+        "--vod-url",
+        help="Process a full Twitch VOD/stream recording URL",
+    )
+    parser.add_argument(
+        "--media-url",
+        help="Auto-detect clip or VOD URL and process",
+    )
+    parser.add_argument(
         "--clip-id",
-        help="Optional clip ID for output naming (used with --clip-url)",
+        help="Optional ID for output naming",
     )
     parser.add_argument(
         "--title",
         default="",
-        help="Optional clip title metadata for hooks/hashtags",
+        help="Optional title metadata for hooks/hashtags",
+    )
+    parser.add_argument(
+        "--max-shorts",
+        type=int,
+        default=None,
+        help="Max TikTok shorts to generate from a VOD (default from config)",
     )
     parser.add_argument(
         "--fetch-clips",
@@ -35,10 +55,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Fetch recent clips from Twitch API and process each one",
     )
     parser.add_argument(
+        "--fetch-vods",
+        action="store_true",
+        help="Fetch recent stream VODs from Twitch API and process each one",
+    )
+    parser.add_argument(
         "--days",
         type=int,
         default=7,
-        help="Days back to fetch clips (with --fetch-clips)",
+        help="Days back to fetch clips/VODs",
     )
     parser.add_argument(
         "--config",
@@ -87,6 +112,28 @@ def main(argv: list[str] | None = None) -> int:
         run_server(config)
         return 0
 
+    if args.vod_url:
+        outputs = process_vod_url(
+            url=args.vod_url,
+            config=config,
+            vod_id=args.clip_id,
+            vod_title=args.title,
+            max_shorts=args.max_shorts,
+        )
+        print(f"\nGenerated {len(outputs)} short(s).")
+        return 0
+
+    if args.media_url:
+        outputs = process_media_url(
+            url=args.media_url,
+            config=config,
+            media_id=args.clip_id,
+            title=args.title,
+            max_shorts=args.max_shorts,
+        )
+        print(f"\nGenerated {len(outputs)} short(s).")
+        return 0
+
     if args.clip_url:
         process_clip_url(
             url=args.clip_url,
@@ -107,10 +154,23 @@ def main(argv: list[str] | None = None) -> int:
             process_twitch_clip(clip, config)
         return 0
 
+    if args.fetch_vods:
+        vods = fetch_recent_vods(config, days_back=args.days)
+        if not vods:
+            print("No VODs found.")
+            return 0
+        print(f"Found {len(vods)} VOD(s). Processing...")
+        for vod in vods:
+            print(f"\n=== {vod.title} ({vod.id}) — {vod.duration_sec/60:.0f} min ===")
+            process_twitch_vod(vod, config, max_shorts=args.max_shorts)
+        return 0
+
     parser.print_help()
     print("\nExamples:")
     print("  python main.py --clip-url https://clips.twitch.tv/SomeClipSlug")
-    print("  python main.py --fetch-clips")
+    print("  python main.py --vod-url https://www.twitch.tv/videos/1234567890")
+    print("  python main.py --media-url https://www.twitch.tv/videos/1234567890")
+    print("  python main.py --fetch-vods --max-shorts 3")
     print("  python main.py --web")
     return 1
 

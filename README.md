@@ -97,12 +97,21 @@ cp .env.example .env
 
 # Process one clip by URL
 python main.py --clip-url "https://clips.twitch.tv/YourClipSlug"
+
+# Process a full stream VOD (generates multiple TikTok shorts)
+python main.py --vod-url "https://www.twitch.tv/videos/1234567890"
+
+# Auto-detect clip vs VOD
+python main.py --media-url "https://www.twitch.tv/videos/1234567890"
+
+# Fetch recent stream VODs from your channel
+python main.py --fetch-vods --max-shorts 3
 ```
 
 Output lands in `output/`:
 
-- `{clip_id}_tiktok.mp4` — vertical short ready to upload
-- `{clip_id}_tiktok.txt` — suggested caption + hashtags
+- Clips: `{clip_id}_tiktok.mp4` + caption `.txt`
+- VODs: `{vod_id}_short_01.mp4`, `{vod_id}_short_02.mp4`, ... (one per highlight found)
 
 Intermediate files (analysis JSON, edit plan, captions) are saved under `data/{clip_id}/`.
 
@@ -137,6 +146,24 @@ Edit `config.yaml` or create `config.local.yaml` to override settings.
 | `render` | 1080×1920, face-aware crop, ffmpeg path |
 | `llm` | Enable LLM planning, model, base URL |
 | `web` | Preview UI host and port |
+
+### Full VOD / stream POV mode
+
+Point the bot at an entire stream recording instead of a short clip. It scans the full VOD in chunks (audio reactions + speech), finds the best highlight moments, and renders **multiple TikTok shorts** automatically.
+
+```yaml
+vod:
+  max_shorts_per_vod: 5      # how many TikToks per stream
+  min_short_gap_sec: 120     # highlights must be 2+ min apart
+  max_download_sec: 0        # 0 = full VOD; set e.g. 3600 to test first hour only
+```
+
+```bash
+python main.py --vod-url "https://www.twitch.tv/videos/YOUR_VOD_ID" --max-shorts 5
+python main.py --fetch-vods
+```
+
+Long VODs take longer (chunked Whisper transcription). Use a GPU or `whisper_model: tiny` for faster runs.
 
 ### Montage mode
 

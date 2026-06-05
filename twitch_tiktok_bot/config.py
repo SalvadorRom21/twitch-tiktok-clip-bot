@@ -17,6 +17,23 @@ class TwitchConfig:
     client_secret: str = ""
     broadcaster_id: str = ""
     max_clips: int = 5
+    max_vods: int = 3
+
+
+@dataclass
+class VodConfig:
+    # How many TikTok shorts to generate from one VOD
+    max_shorts_per_vod: int = 5
+    # Min seconds between highlight windows
+    min_short_gap_sec: float = 120.0
+    # Audio peak scan chunk size (seconds)
+    audio_scan_chunk_sec: float = 600.0
+    # Whisper transcription chunk size (seconds)
+    whisper_chunk_sec: float = 300.0
+    # Max peaks to consider when scoring highlights
+    peak_candidate_limit: int = 80
+    # Optional: only download first N seconds of VOD (0 = full VOD)
+    max_download_sec: float = 0.0
 
 
 @dataclass
@@ -76,6 +93,7 @@ class WebConfig:
 @dataclass
 class AppConfig:
     twitch: TwitchConfig = field(default_factory=TwitchConfig)
+    vod: VodConfig = field(default_factory=VodConfig)
     analysis: AnalysisConfig = field(default_factory=AnalysisConfig)
     editing: EditingConfig = field(default_factory=EditingConfig)
     render: RenderConfig = field(default_factory=RenderConfig)
@@ -128,6 +146,7 @@ def load_config(
 
     return AppConfig(
         twitch=_merge_dataclass(TwitchConfig, twitch_raw),
+        vod=_merge_dataclass(VodConfig, raw.get("vod")),
         analysis=_merge_dataclass(AnalysisConfig, raw.get("analysis")),
         editing=_merge_dataclass(EditingConfig, raw.get("editing")),
         render=_merge_dataclass(RenderConfig, raw.get("render")),
