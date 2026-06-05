@@ -1,0 +1,17 @@
+# Core
+pyyaml>=6.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Download
+yt-dlp>=2024.1.0
+
+# Analysis
+numpy>=1.26.0
+faster-whisper>=1.0.0
+
+# Optional: Twitch API
+twitchAPI>=4.0.0
+
+# Optional: LLM edit planning (OpenAI-compatible)
+openai>=1.30.0

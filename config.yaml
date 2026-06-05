@@ -1,0 +1,46 @@
+# Twitch-to-TikTok Clip Bot configuration
+# Copy to config.local.yaml to override, or set env vars (see README).
+
+twitch:
+  client_id: ""
+  client_secret: ""
+  broadcaster_id: ""
+  # How many recent clips to fetch when using --fetch-clips
+  max_clips: 5
+
+analysis:
+  whisper_model: "base"  # tiny, base, small, medium, large-v3
+  whisper_device: "cpu"  # cpu or cuda
+  whisper_compute_type: "int8"  # int8, float16, float32
+  # Sample a frame every N seconds for vision summary (0 = disabled)
+  vision_frame_interval_sec: 5
+
+editing:
+  target_duration_sec: 30
+  min_duration_sec: 15
+  max_duration_sec: 60
+  # Remove silence longer than this (seconds)
+  silence_threshold_sec: 0.4
+  # Audio peak sensitivity (0.0-1.0, higher = fewer peaks)
+  peak_percentile: 85
+  max_zoom_effects: 3
+  caption_style: "bold"  # bold, karaoke
+
+render:
+  width: 1080
+  height: 1920
+  fps: 30
+  # Path to ffmpeg binary (empty = use PATH)
+  ffmpeg_path: ""
+
+llm:
+  enabled: false
+  # OpenAI-compatible API (OpenAI, Groq, local LM Studio, etc.)
+  api_key_env: "OPENAI_API_KEY"
+  base_url: ""  # e.g. https://api.groq.com/openai/v1
+  model: "gpt-4o-mini"
+
+paths:
+  data_dir: "data"
+  output_dir: "output"
+  sfx_dir: "assets/sfx"

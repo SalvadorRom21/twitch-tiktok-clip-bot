@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Project data
+data/
+output/
+*.mp4
+*.wav
+*.mp3
+*.json.bak
+
+# Secrets
+.env
+config.local.yaml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Whisper models cache
+.cache/
