@@ -52,6 +52,22 @@ def build_parser() -> argparse.ArgumentParser:
         default=Path.cwd(),
         help="Project root for resolving relative paths",
     )
+    parser.add_argument(
+        "--web",
+        action="store_true",
+        help="Start the preview web UI server",
+    )
+    parser.add_argument(
+        "--host",
+        default=None,
+        help="Web server host (with --web, default from config)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help="Web server port (with --web, default from config)",
+    )
     return parser
 
 
@@ -59,6 +75,17 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     config = load_config(config_path=args.config, project_root=args.project_root)
+
+    if args.web:
+        if args.host:
+            config.web.host = args.host
+        if args.port:
+            config.web.port = args.port
+        from twitch_tiktok_bot.web.app import run_server
+
+        print(f"Starting preview UI at http://{config.web.host}:{config.web.port}")
+        run_server(config)
+        return 0
 
     if args.clip_url:
         process_clip_url(
@@ -84,6 +111,7 @@ def main(argv: list[str] | None = None) -> int:
     print("\nExamples:")
     print("  python main.py --clip-url https://clips.twitch.tv/SomeClipSlug")
     print("  python main.py --fetch-clips")
+    print("  python main.py --web")
     return 1
 
 

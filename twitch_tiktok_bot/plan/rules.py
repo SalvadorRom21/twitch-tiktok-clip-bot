@@ -53,13 +53,83 @@ def _pick_highlight_window(analysis: ClipAnalysis, target: float) -> tuple[float
     return best_start, min(best_start + target, duration)
 
 
-def _trim_silence_segments(
-    segments: list[EditSegment], silence_threshold: float
-) -> list[EditSegment]:
-    if not segments:
-        return segments
-    # For MVP we keep one contiguous block; silence trimming happens at render time.
-    return segments
+def _overlaps(a: EditSegment, b: EditSegment, gap: float = 2.0) -> bool:
+    return not (a.end + gap <= b.start or b.end + gap <= a.start)
+
+
+def _window_around_time(
+    time: float,
+    duration: float,
+    min_len: float,
+    max_len: float,
+) -> EditSegment:
+    half = max_len / 2
+    start = max(0.0, time - half * 0.6)
+    end = min(duration, start + max_len)
+    if end - start < min_len:
+        start = max(0.0, end - min_len)
+    return EditSegment(start=start, end=end, reason="highlight moment")
+
+
+def _pick_montage_segments(analysis: ClipAnalysis, config: AppConfig) -> list[EditSegment]:
+    editing = config.editing
+    duration = analysis.duration
+    if duration <= editing.min_duration_sec:
+        return [EditSegment(start=0.0, end=duration, reason="full clip")]
+
+    candidates: list[tuple[float, EditSegment]] = []
+
+    for peak in analysis.loud_peaks:
+        seg = _window_around_time(
+            peak.time,
+            duration,
+            editing.min_segment_sec,
+            editing.max_segment_sec,
+        )
+        seg.reason = "reaction peak"
+        candidates.append((_score_window(analysis, seg.start, seg.end), seg))
+
+    for transcript in analysis.transcript_segments:
+        if not EXCITING_WORDS.search(transcript.text):
+            continue
+        mid = (transcript.start + transcript.end) / 2
+        seg = _window_around_time(
+            mid,
+            duration,
+            editing.min_segment_sec,
+            editing.max_segment_sec,
+        )
+        seg.reason = "exciting line"
+        candidates.append((_score_window(analysis, seg.start, seg.end) + 1.0, seg))
+
+    if not candidates:
+        start, end = _pick_highlight_window(analysis, editing.target_duration_sec)
+        return [EditSegment(start=start, end=end, reason="highlight window")]
+
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    selected: list[EditSegment] = []
+    total = 0.0
+    target = min(editing.target_duration_sec, editing.max_duration_sec)
+
+    for _, seg in candidates:
+        if len(selected) >= editing.max_montage_segments:
+            break
+        seg_len = seg.end - seg.start
+        if seg_len < editing.min_segment_sec:
+            continue
+        if any(_overlaps(seg, existing) for existing in selected):
+            continue
+        if total + seg_len > target + 2.0:
+            continue
+        selected.append(seg)
+        total += seg_len
+
+    if not selected:
+        start, end = _pick_highlight_window(analysis, target)
+        return [EditSegment(start=start, end=end, reason="highlight window")]
+
+    selected.sort(key=lambda s: s.start)
+    return selected
 
 
 def _build_hook_text(analysis: ClipAnalysis) -> str:
@@ -85,20 +155,19 @@ def _build_hashtags(analysis: ClipAnalysis) -> list[str]:
     return tags[:6]
 
 
-def create_rule_based_plan(analysis: ClipAnalysis, config: AppConfig) -> EditPlan:
-    editing = config.editing
-    target = min(editing.target_duration_sec, editing.max_duration_sec)
-    start, end = _pick_highlight_window(analysis, target)
-
-    segments = [EditSegment(start=start, end=end, reason="highlight window")]
-    segments = _trim_silence_segments(segments, editing.silence_threshold_sec)
-
+def _collect_effects(
+    analysis: ClipAnalysis,
+    segments: list[EditSegment],
+    config: AppConfig,
+) -> list[EditEffect]:
     effects: list[EditEffect] = []
     zoom_count = 0
+    seg_ranges = [(s.start, s.end) for s in segments]
+
     for peak in analysis.loud_peaks:
-        if zoom_count >= editing.max_zoom_effects:
+        if zoom_count >= config.editing.max_zoom_effects:
             break
-        if start <= peak.time <= end:
+        if any(start <= peak.time <= end for start, end in seg_ranges):
             effects.append(
                 EditEffect(
                     time=peak.time,
@@ -109,14 +178,14 @@ def create_rule_based_plan(analysis: ClipAnalysis, config: AppConfig) -> EditPla
             )
             zoom_count += 1
 
-    for seg in analysis.transcript_segments:
-        if not (start <= seg.start <= end):
+    for transcript in analysis.transcript_segments:
+        if not any(start <= transcript.start <= end for start, end in seg_ranges):
             continue
-        match = EXCITING_WORDS.search(seg.text)
+        match = EXCITING_WORDS.search(transcript.text)
         if match:
             effects.append(
                 EditEffect(
-                    time=seg.start,
+                    time=transcript.start,
                     effect_type="caption_emphasis",
                     text=match.group(0).upper(),
                     duration=1.0,
@@ -124,8 +193,24 @@ def create_rule_based_plan(analysis: ClipAnalysis, config: AppConfig) -> EditPla
             )
             break
 
+    return effects
+
+
+def create_rule_based_plan(analysis: ClipAnalysis, config: AppConfig) -> EditPlan:
+    editing = config.editing
+
+    if editing.montage_enabled and analysis.duration > editing.min_duration_sec + 5:
+        segments = _pick_montage_segments(analysis, config)
+    else:
+        target = min(editing.target_duration_sec, editing.max_duration_sec)
+        start, end = _pick_highlight_window(analysis, target)
+        segments = [EditSegment(start=start, end=end, reason="highlight window")]
+
+    total_duration = sum(s.end - s.start for s in segments)
+    effects = _collect_effects(analysis, segments, config)
+
     return EditPlan(
-        target_duration_sec=end - start,
+        target_duration_sec=total_duration,
         segments=segments,
         effects=effects,
         hook_text=_build_hook_text(analysis),

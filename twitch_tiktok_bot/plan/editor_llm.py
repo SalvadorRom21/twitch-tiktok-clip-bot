@@ -14,10 +14,10 @@ SYSTEM_PROMPT = """You are a short-form video editor for TikTok.
 Given analysis of a Twitch clip, output a JSON edit plan only.
 
 Goals:
-- One coherent 15-60 second moment
+- Build a 15-60 second TikTok short, either one window or a montage of 2-4 tight moments
 - Prefer segments with loud peaks and exciting speech
 - Add light entertainment: 1-3 zoom effects on reactions, bold hook text
-- Remove long dead air conceptually by picking a tight window
+- Remove long dead air by picking tight non-overlapping segments for montages
 
 Output JSON schema:
 {

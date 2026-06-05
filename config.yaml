@@ -25,6 +25,11 @@ editing:
   peak_percentile: 85
   max_zoom_effects: 3
   caption_style: "bold"  # bold, karaoke
+  # Multi-segment montage mode (jump between highlight moments)
+  montage_enabled: true
+  max_montage_segments: 4
+  min_segment_sec: 4
+  max_segment_sec: 12
 
 render:
   width: 1080
@@ -32,6 +37,9 @@ render:
   fps: 30
   # Path to ffmpeg binary (empty = use PATH)
   ffmpeg_path: ""
+  # Center vertical crop on detected face cam
+  face_crop_enabled: true
+  face_sample_count: 8
 
 llm:
   enabled: false
@@ -44,3 +52,7 @@ paths:
   data_dir: "data"
   output_dir: "output"
   sfx_dir: "assets/sfx"
+
+web:
+  host: "127.0.0.1"
+  port: 8080

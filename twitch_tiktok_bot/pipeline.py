@@ -11,6 +11,7 @@ from twitch_tiktok_bot.ingest.download import download_clip
 from twitch_tiktok_bot.models import TwitchClip
 from twitch_tiktok_bot.plan.editor_llm import create_edit_plan
 from twitch_tiktok_bot.render.ffmpeg_build import render_short
+from twitch_tiktok_bot.status import ClipJob, ClipStatus, save_job
 
 
 def process_clip_url(
@@ -55,6 +56,8 @@ def process_clip_url(
     print(f"       -> {out_path}")
     print(f"       caption -> {out_path.with_suffix('.txt')}")
 
+    plan_data = json.loads((work_dir / "edit_plan.json").read_text(encoding="utf-8"))
+
     summary = {
         "clip_id": safe_id,
         "source_url": url,
@@ -65,6 +68,22 @@ def process_clip_url(
     }
     (work_dir / "job_summary.json").write_text(
         json.dumps(summary, indent=2), encoding="utf-8"
+    )
+
+    save_job(
+        config,
+        ClipJob(
+            id=safe_id,
+            clip_url=url,
+            title=clip_title,
+            status=ClipStatus.READY,
+            output_video=str(out_path),
+            caption_file=str(out_path.with_suffix(".txt")),
+            hook_text=plan_data.get("hook_text", ""),
+            hashtags=list(plan_data.get("hashtags", [])),
+            segment_count=len(plan_data.get("segments", [])),
+            face_crop_center_x=analysis.face_crop_center_x,
+        ),
     )
     return out_path
 

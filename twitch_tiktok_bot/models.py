@@ -47,6 +47,8 @@ class ClipAnalysis:
     vision_summary: str = ""
     clip_title: str = ""
     game_name: str = ""
+    # Normalized 0-1 horizontal face center for crop; None = center crop
+    face_crop_center_x: float | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -66,6 +68,7 @@ class ClipAnalysis:
             "vision_summary": self.vision_summary,
             "clip_title": self.clip_title,
             "game_name": self.game_name,
+            "face_crop_center_x": self.face_crop_center_x,
         }
 
 

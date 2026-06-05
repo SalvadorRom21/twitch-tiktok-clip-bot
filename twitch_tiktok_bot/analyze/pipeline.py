@@ -8,6 +8,7 @@ import subprocess
 from pathlib import Path
 
 from twitch_tiktok_bot.analyze.audio import analyze_audio
+from twitch_tiktok_bot.analyze.face import detect_face_crop_center
 from twitch_tiktok_bot.analyze.speech import transcribe
 from twitch_tiktok_bot.analyze.vision import (
     build_vision_summary,
@@ -105,6 +106,18 @@ def analyze_clip(
             )
         vision_summary = build_vision_summary(vision_frames)
 
+    face_center: float | None = None
+    if config.render.face_crop_enabled:
+        print("  [analyze] face detection for crop...")
+        face_center = detect_face_crop_center(
+            video_path,
+            work_dir,
+            sample_count=config.render.face_sample_count,
+            ffmpeg=ffmpeg,
+        )
+        if face_center is not None:
+            print(f"       face crop center x={face_center:.2f}")
+
     result = ClipAnalysis(
         duration=duration,
         transcript_segments=transcript,
@@ -115,6 +128,7 @@ def analyze_clip(
         vision_summary=vision_summary,
         clip_title=clip_title,
         game_name=game_name,
+        face_crop_center_x=face_center,
     )
 
     analysis_path = work_dir / "analysis.json"

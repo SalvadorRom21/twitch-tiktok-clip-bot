@@ -36,6 +36,10 @@ class EditingConfig:
     peak_percentile: float = 85.0
     max_zoom_effects: int = 3
     caption_style: str = "bold"
+    montage_enabled: bool = True
+    max_montage_segments: int = 4
+    min_segment_sec: float = 4.0
+    max_segment_sec: float = 12.0
 
 
 @dataclass
@@ -44,6 +48,8 @@ class RenderConfig:
     height: int = 1920
     fps: int = 30
     ffmpeg_path: str = ""
+    face_crop_enabled: bool = True
+    face_sample_count: int = 8
 
 
 @dataclass
@@ -62,6 +68,12 @@ class PathsConfig:
 
 
 @dataclass
+class WebConfig:
+    host: str = "127.0.0.1"
+    port: int = 8080
+
+
+@dataclass
 class AppConfig:
     twitch: TwitchConfig = field(default_factory=TwitchConfig)
     analysis: AnalysisConfig = field(default_factory=AnalysisConfig)
@@ -69,6 +81,7 @@ class AppConfig:
     render: RenderConfig = field(default_factory=RenderConfig)
     llm: LLMConfig = field(default_factory=LLMConfig)
     paths: PathsConfig = field(default_factory=PathsConfig)
+    web: WebConfig = field(default_factory=WebConfig)
     project_root: Path = field(default_factory=lambda: Path.cwd())
 
     def resolve_path(self, relative: str) -> Path:
@@ -120,5 +133,6 @@ def load_config(
         render=_merge_dataclass(RenderConfig, raw.get("render")),
         llm=_merge_dataclass(LLMConfig, llm_raw),
         paths=_merge_dataclass(PathsConfig, raw.get("paths")),
+        web=_merge_dataclass(WebConfig, raw.get("web")),
         project_root=root,
     )
