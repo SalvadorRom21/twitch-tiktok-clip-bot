@@ -49,11 +49,33 @@ git remote set-url origin https://github.com/YOUR_USER/twitch-tiktok-clip-bot.gi
 git push -u origin main
 ```
 
+## Windows one-command setup
+
+Open **PowerShell** and paste:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force
+irm https://raw.githubusercontent.com/SalvadorRom21/twitch-tiktok-clip-bot/main/setup-windows.ps1 | iex
+```
+
+This installs the project to:
+
+```text
+C:\Users\YOUR_USERNAME\Documents\twitch-tiktok-clip-bot
+```
+
+Then add Twitch credentials and run:
+
+```powershell
+notepad config.local.yaml
+python main.py --web
+```
+
 ## Quick start
 
 ```bash
 # Clone and enter the repo
-git clone https://github.com/YOUR_USER/twitch-tiktok-clip-bot.git
+git clone https://github.com/SalvadorRom21/twitch-tiktok-clip-bot.git
 cd twitch-tiktok-clip-bot
 
 # Create a virtual environment
