@@ -27,10 +27,33 @@ Optional:
 - **OpenAI-compatible API key** — for LLM edit plans and vision frame descriptions
 - **NVIDIA GPU** — set `analysis.whisper_device: cuda` in config for faster transcription
 
+## Recreate on GitHub (if the remote repo was deleted)
+
+From this project folder, after [installing GitHub CLI](https://cli.github.com/) and running `gh auth login`:
+
+```bash
+chmod +x scripts/recreate_github_repo.sh
+./scripts/recreate_github_repo.sh
+```
+
+That creates `SalvadorRom21/twitch-tiktok-clip-bot` and pushes `main`. Override names if needed:
+
+```bash
+GITHUB_OWNER=YourUsername GITHUB_REPO=your-repo-name ./scripts/recreate_github_repo.sh
+```
+
+**Manual option:** create an empty repo on GitHub, then:
+
+```bash
+git remote set-url origin https://github.com/YOUR_USER/twitch-tiktok-clip-bot.git
+git push -u origin main
+```
+
 ## Quick start
 
 ```bash
 # Clone and enter the repo
+git clone https://github.com/YOUR_USER/twitch-tiktok-clip-bot.git
 cd twitch-tiktok-clip-bot
 
 # Create a virtual environment
