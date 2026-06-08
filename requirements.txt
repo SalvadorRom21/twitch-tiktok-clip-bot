@@ -10,6 +10,9 @@ yt-dlp>=2024.1.0
 numpy>=1.26.0
 faster-whisper>=1.0.0
 opencv-python-headless>=4.9.0
+# CUDA libs for faster-whisper on Windows (RTX GPUs; optional if using cpu)
+nvidia-cublas-cu12>=12.0.0
+nvidia-cuda-runtime-cu12>=12.0.0
 
 # Web preview UI
 fastapi>=0.110.0
@@ -18,5 +21,6 @@ uvicorn>=0.27.0
 # Optional: Twitch API
 twitchAPI>=4.0.0,<5.0.0
 
-# Optional: LLM edit planning (OpenAI-compatible)
+# Optional: LLM edit planning
+cursor-sdk>=0.1.0
 openai>=1.30.0

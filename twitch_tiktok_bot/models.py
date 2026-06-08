@@ -49,6 +49,8 @@ class ClipAnalysis:
     game_name: str = ""
     # Normalized 0-1 horizontal face center for crop; None = center crop
     face_crop_center_x: float | None = None
+    # Face-cam overlay box (x, y, w, h) for stacked layout
+    face_cam_region: dict[str, float] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -69,6 +71,7 @@ class ClipAnalysis:
             "clip_title": self.clip_title,
             "game_name": self.game_name,
             "face_crop_center_x": self.face_crop_center_x,
+            "face_cam_region": self.face_cam_region,
         }
 
 

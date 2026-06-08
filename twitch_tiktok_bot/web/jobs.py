@@ -6,7 +6,9 @@ import json
 import threading
 import uuid
 
-from twitch_tiktok_bot.config import AppConfig
+import copy
+
+from twitch_tiktok_bot.config import AppConfig, apply_game_profile
 from twitch_tiktok_bot.ingest.vod import is_vod_url
 from twitch_tiktok_bot.status import ClipJob, ClipStatus, load_job, save_job
 
@@ -15,17 +17,21 @@ _lock = threading.Lock()
 _active_threads: dict[str, threading.Thread] = {}
 
 
-def _run_job(config: AppConfig, job: ClipJob) -> None:
+def _run_job(config: AppConfig, job: ClipJob, game_profile: str | None = None) -> None:
     from twitch_tiktok_bot.pipeline import process_media_url
+
+    run_config = copy.copy(config)
+    run_config.editing = copy.copy(config.editing)
+    apply_game_profile(run_config, game_profile)
 
     try:
         outputs = process_media_url(
             url=job.clip_url,
-            config=config,
+            config=run_config,
             media_id=job.id,
             title=job.title,
         )
-        work_dir = config.resolve_path(config.paths.data_dir) / job.id
+        work_dir = run_config.resolve_path(run_config.paths.data_dir) / job.id
         analysis_path = work_dir / "analysis.json"
         analysis_data = (
             json.loads(analysis_path.read_text(encoding="utf-8"))
@@ -59,7 +65,7 @@ def _run_job(config: AppConfig, job: ClipJob) -> None:
     except Exception as exc:  # noqa: BLE001 — surface pipeline errors to UI
         job.status = ClipStatus.FAILED
         job.error = str(exc)
-    save_job(config, job)
+    save_job(run_config, job)
 
 
 def start_job(
@@ -67,6 +73,7 @@ def start_job(
     clip_url: str,
     title: str = "",
     clip_id: str | None = None,
+    game_profile: str | None = None,
 ) -> ClipJob:
     job_id = clip_id or uuid.uuid4().hex[:12]
     job = ClipJob(
@@ -79,7 +86,7 @@ def start_job(
     save_job(config, job)
 
     def _target() -> None:
-        _run_job(config, job)
+        _run_job(config, job, game_profile=game_profile)
         with _lock:
             _active_threads.pop(job_id, None)
 

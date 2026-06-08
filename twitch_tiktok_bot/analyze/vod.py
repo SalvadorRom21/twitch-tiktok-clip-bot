@@ -12,7 +12,7 @@ from twitch_tiktok_bot.analyze.audio import (
     _read_wav_mono,
 )
 from twitch_tiktok_bot.analyze.duration import get_video_duration
-from twitch_tiktok_bot.analyze.face import detect_face_crop_center
+from twitch_tiktok_bot.analyze.face_cam import resolve_face_cam_layout
 from twitch_tiktok_bot.analyze.speech import transcribe
 from twitch_tiktok_bot.config import AppConfig
 from twitch_tiktok_bot.models import ClipAnalysis, LoudPeak, TimeRange, TranscriptSegment
@@ -177,14 +177,26 @@ def analyze_vod(
     )
     print(f"       transcript segments: {len(transcript)}")
 
-    face_center: float | None = None
-    if config.render.face_crop_enabled:
-        print("  [analyze] face detection (stream sample)...")
-        face_center = detect_face_crop_center(
-            video_path,
-            work_dir,
-            sample_count=config.render.face_sample_count,
-            ffmpeg=ffmpeg,
+    print("  [analyze] face-cam detection (spread across full VOD)...")
+    face_layout = resolve_face_cam_layout(
+        video_path, work_dir, config, ffmpeg=ffmpeg
+    )
+    if face_layout.method == "override":
+        print("       using face_cam_override from config")
+    elif face_layout.face_cam_region and face_layout.method not in (
+        "disabled",
+        "default",
+        "",
+    ):
+        region = face_layout.face_cam_region
+        print(
+            f"       face cam overlay at x={region['x']:.2f} y={region['y']:.2f} "
+            f"({region['w']:.0%}×{region['h']:.0%}) via {face_layout.method}"
+        )
+    elif face_layout.method == "default":
+        print(
+            f"       using default {config.render.face_cam_corner} face cam "
+            "(detection failed)"
         )
 
     result = ClipAnalysis(
@@ -197,7 +209,8 @@ def analyze_vod(
         vision_summary="",
         clip_title=vod_title,
         game_name=game_name,
-        face_crop_center_x=face_center,
+        face_crop_center_x=face_layout.face_crop_center_x,
+        face_cam_region=face_layout.face_cam_region,
     )
     (work_dir / "analysis.json").write_text(
         json.dumps(result.to_dict(), indent=2), encoding="utf-8"

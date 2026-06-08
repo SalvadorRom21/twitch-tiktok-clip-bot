@@ -83,6 +83,19 @@ async def _fetch_clips_async(config: AppConfig, days_back: int = 7) -> list[Twit
         if len(clips) >= twitch.max_clips:
             break
 
+    game_ids = list({c.game_id for c in clips if c.game_id})
+    game_names: dict[str, str] = {}
+    if game_ids:
+        try:
+            async for game in api.get_games(ids=game_ids):
+                game_names[game.id] = game.name or ""
+        except Exception:
+            pass
+
+    for clip in clips:
+        if clip.game_id and clip.game_id in game_names:
+            clip.game_name = game_names[clip.game_id]
+
     await api.close()
     return clips
 

@@ -22,7 +22,14 @@ vod:
   # Set to 3600 to only download/process first hour while testing
   max_download_sec: 0
 
-# Optional: enable smarter LLM edit plans (requires OPENAI_API_KEY in .env)
+# GPU transcription (NVIDIA): whisper_device: cuda, whisper_compute_type: float16
+# analysis:
+#   whisper_model: small
+#   whisper_device: cuda
+#   whisper_compute_type: float16
+
+# Cursor agent edit plans (set CURSOR_API_KEY in .env — no OpenAI key needed)
 # llm:
 #   enabled: true
-#   model: gpt-4o-mini
+#   provider: cursor
+#   cursor_model: composer-2.5
