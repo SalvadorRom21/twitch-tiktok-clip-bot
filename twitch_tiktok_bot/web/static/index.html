@@ -50,12 +50,12 @@
       padding: 1rem;
     }
     label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.35rem; }
-    input, textarea, button {
+    input, textarea, select, button {
       font: inherit;
       border-radius: 10px;
       border: 1px solid var(--border);
     }
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       background: #12121a;
       color: var(--text);
@@ -129,7 +129,11 @@
       <h1>Twitch → TikTok Preview</h1>
       <div class="subtitle">Review montages, tweak captions, approve before upload</div>
     </div>
-    <button class="secondary" id="refreshBtn">Refresh</button>
+    <div style="display:flex;gap:0.75rem;align-items:center;">
+      <a href="/label" style="color:var(--accent-2);text-decoration:none;font-size:0.9rem;">Fight labeler</a>
+      <a href="/literacy" style="color:var(--accent-2);text-decoration:none;font-size:0.9rem;">Apex trainer</a>
+      <button class="secondary" id="refreshBtn">Refresh</button>
+    </div>
   </header>
 
   <main>
@@ -142,6 +146,11 @@
         <label for="clipTitle">Title (optional)</label>
         <input id="clipTitle" placeholder="Clutch round" />
       </div>
+      <div>
+        <label for="gameProfile">Game profile</label>
+        <select id="gameProfile"></select>
+        <div class="meta" id="gameProfileHint" style="margin-top: 0.35rem;"></div>
+      </div>
       <button id="processBtn">Process clip</button>
       <div class="clip-list" id="clipList"></div>
     </section>
@@ -150,7 +159,7 @@
       <div class="empty" id="emptyState">Select a clip or process a new one to preview.</div>
       <div id="previewContent" hidden>
         <div class="preview-grid">
-          <video id="player" controls playsinline></video>
+          <video id="player" controls playsinline preload="metadata"></video>
           <div class="stack">
             <div>
               <span class="badge" id="statusBadge">ready</span>
@@ -172,10 +181,15 @@
   </main>
 
   <script>
+    const GAME_PROFILE_STORAGE_KEY = "twitch-tiktok-game-profile";
     let selectedId = null;
+    let loadedVideoId = null;
     let pollTimer = null;
+    let gameProfileOptions = [];
 
     const clipList = document.getElementById("clipList");
+    const gameProfileSelect = document.getElementById("gameProfile");
+    const gameProfileHint = document.getElementById("gameProfileHint");
     const emptyState = document.getElementById("emptyState");
     const previewContent = document.getElementById("previewContent");
     const player = document.getElementById("player");
@@ -186,6 +200,33 @@
     async function fetchClips() {
       const res = await fetch("/api/clips");
       return res.json();
+    }
+
+    async function fetchGameProfiles() {
+      const res = await fetch("/api/game-profiles");
+      return res.json();
+    }
+
+    function updateGameProfileHint() {
+      const selected = gameProfileOptions.find((opt) => opt.id === gameProfileSelect.value);
+      gameProfileHint.textContent = selected ? selected.description : "";
+    }
+
+    function renderGameProfileOptions(data) {
+      gameProfileOptions = data.options || [];
+      const saved = localStorage.getItem(GAME_PROFILE_STORAGE_KEY);
+      const initial = saved || data.default || "auto";
+      gameProfileSelect.innerHTML = "";
+      for (const opt of gameProfileOptions) {
+        const el = document.createElement("option");
+        el.value = opt.id;
+        el.textContent = opt.label;
+        gameProfileSelect.appendChild(el);
+      }
+      if (gameProfileOptions.some((opt) => opt.id === initial)) {
+        gameProfileSelect.value = initial;
+      }
+      updateGameProfileHint();
     }
 
     async function fetchCaption(id) {
@@ -242,10 +283,15 @@
         clipMeta.textContent += ` · showing short 1 of ${clip.output_videos.length}`;
       }
       if (clip.status === "ready" || clip.status === "approved" || clip.status === "rejected") {
-        player.src = `/api/clips/${id}/video?ts=${Date.now()}`;
+        // Only reload the <video> when the clip changes — avoids stutter on Refresh.
+        if (loadedVideoId !== id) {
+          player.src = `/api/clips/${id}/video`;
+          loadedVideoId = id;
+        }
       } else {
         player.removeAttribute("src");
         player.load();
+        loadedVideoId = null;
       }
       if (clip.error) clipMeta.textContent += ` · Error: ${clip.error}`;
 
@@ -267,14 +313,21 @@
       }
     }
 
+    gameProfileSelect.onchange = () => {
+      localStorage.setItem(GAME_PROFILE_STORAGE_KEY, gameProfileSelect.value);
+      updateGameProfileHint();
+    };
+
     document.getElementById("processBtn").onclick = async () => {
       const clip_url = document.getElementById("clipUrl").value.trim();
       const title = document.getElementById("clipTitle").value.trim();
+      const game_profile = gameProfileSelect.value;
       if (!clip_url) return alert("Enter a Twitch clip URL");
+      localStorage.setItem(GAME_PROFILE_STORAGE_KEY, game_profile);
       const res = await fetch("/api/process", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clip_url, title }),
+        body: JSON.stringify({ clip_url, title, game_profile }),
       });
       const job = await res.json();
       selectedId = job.id;
@@ -305,6 +358,7 @@
     };
 
     document.getElementById("refreshBtn").onclick = refresh;
+    fetchGameProfiles().then(renderGameProfileOptions);
     refresh();
   </script>
 </body>

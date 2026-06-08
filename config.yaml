@@ -27,28 +27,55 @@ analysis:
   vision_frame_interval_sec: 5
 
 editing:
-  target_duration_sec: 30
-  min_duration_sec: 15
-  max_duration_sec: 60
+  target_duration_sec: 28
+  min_duration_sec: 12
+  max_duration_sec: 45
   silence_threshold_sec: 0.4
-  peak_percentile: 85
+  peak_percentile: 88
   max_zoom_effects: 3
+  zoom_scale: 1.18
+  zoom_duration_sec: 0.5
   caption_style: "bold"
+  caption_max_words: 7
+  hook_duration_sec: 3.5
+  hook_first: true
   montage_enabled: true
-  max_montage_segments: 4
-  min_segment_sec: 4
-  max_segment_sec: 12
+  scan_full_pov: true
+  pov_montage: true
+  max_montage_segments: 5
+  min_segment_sec: 2.5
+  max_segment_sec: 7
+  montage_cluster_sec: 90
+  montage_crossfade_sec: 0.3
+  game_profile: auto
+  clip_style: default
+  min_moment_score: 5.0
 
 render:
   width: 1080
   height: 1920
-  fps: 30
+  fps: 60
+  match_source_fps: true
   ffmpeg_path: ""
+  encode_preset: medium
+  crf: 20
+  audio_bitrate: 192k
+  layout: stacked
+  face_panel_ratio: 0.34
   face_crop_enabled: true
-  face_sample_count: 8
+  face_sample_count: 10
+  # Where your webcam sits: auto | top-left | top-right | bottom-left | bottom-right
+  face_cam_corner: auto
+  # Exact box override (normalized 0-1) if auto-detect is still off:
+  # face_cam_override: { x: 0.01, y: 0.03, w: 0.20, h: 0.28 }
 
 llm:
   enabled: false
+  # cursor = Cursor SDK + CURSOR_API_KEY (no OpenAI key needed)
+  # openai = OpenAI-compatible API + OPENAI_API_KEY
+  provider: "cursor"
+  cursor_api_key_env: "CURSOR_API_KEY"
+  cursor_model: "composer-2.5"
   api_key_env: "OPENAI_API_KEY"
   base_url: ""
   model: "gpt-4o-mini"
@@ -60,4 +87,4 @@ paths:
 
 web:
   host: "127.0.0.1"
-  port: 8080
+  port: 8081

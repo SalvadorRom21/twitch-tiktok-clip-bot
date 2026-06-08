@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apex Literacy Trainer</title>
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --panel: #1a1a22;
+      --border: #2d2d3a;
+      --text: #f2f2f7;
+      --muted: #9b9bb0;
+      --accent: #9146ff;
+      --accent-2: #00f2ea;
+      --ok: #3dd68c;
+      --warn: #f5a524;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background: radial-gradient(circle at top, #122018, var(--bg) 50%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    h1 { margin: 0; font-size: 1.2rem; }
+    .subtitle { color: var(--muted); font-size: 0.85rem; }
+    a { color: var(--accent-2); text-decoration: none; }
+    nav.links { display: flex; gap: 1rem; font-size: 0.88rem; }
+    main {
+      display: grid;
+      grid-template-columns: 300px 1fr 360px;
+      gap: 1rem;
+      padding: 1rem 1.5rem 1.5rem;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.85rem;
+    }
+    label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.3rem; }
+    input, textarea, select, button {
+      font: inherit;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    input, textarea, select {
+      width: 100%;
+      background: #12121a;
+      color: var(--text);
+      padding: 0.55rem 0.65rem;
+    }
+    textarea { min-height: 64px; resize: vertical; }
+    button {
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.55rem 0.8rem;
+      font-weight: 600;
+    }
+    button.secondary { background: #2a2a38; }
+    button.ok { background: #1f6b4a; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .stack { display: grid; gap: 0.65rem; }
+    .tabs { display: flex; gap: 0.35rem; margin-bottom: 0.65rem; }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.45rem;
+      border-radius: 8px;
+      background: #12121a;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 0.82rem;
+    }
+    .tab.active { border-color: var(--accent-2); color: var(--accent-2); }
+    .progress {
+      height: 6px;
+      background: #12121a;
+      border-radius: 99px;
+      overflow: hidden;
+      margin: 0.5rem 0;
+    }
+    .progress > div {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 0.2s;
+    }
+    .moment-list { max-height: 68vh; overflow: auto; display: grid; gap: 0.4rem; }
+    .moment-item {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.55rem;
+      cursor: pointer;
+      background: #12121a;
+    }
+    .moment-item:hover { border-color: var(--accent); }
+    .moment-item.active { border-color: var(--accent-2); box-shadow: 0 0 0 1px var(--accent-2) inset; }
+    .moment-item.done { border-left: 3px solid var(--ok); }
+    .moment-time { font-family: ui-monospace, monospace; font-size: 0.82rem; color: var(--accent-2); }
+    .moment-title { font-weight: 600; font-size: 0.88rem; margin: 0.15rem 0; }
+    .moment-q { font-size: 0.78rem; color: var(--muted); line-height: 1.35; }
+    .fight-group { font-size: 0.75rem; color: var(--warn); margin: 0.6rem 0 0.25rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .video-wrap {
+      background: #000;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    video { width: 100%; display: block; max-height: 58vh; }
+    .bot-q {
+      background: #12121a;
+      border-left: 3px solid var(--accent);
+      padding: 0.65rem;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+    .hint { font-size: 0.78rem; color: var(--muted); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; }
+    .general-item { border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem; background: #12121a; }
+    @media (max-width: 1100px) {
+      main { grid-template-columns: 1fr; }
+      .moment-list { max-height: 40vh; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Apex Literacy Trainer</h1>
+      <div class="subtitle">Teach the bot what in-game moments mean — so it can clip fights on its own.</div>
+    </div>
+    <nav class="links">
+      <a href="/">Preview</a>
+      <a href="/label">Fight labeler</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="panel stack">
+      <div>
+        <label for="vodSelect">VOD</label>
+        <select id="vodSelect"></select>
+      </div>
+      <div class="tabs">
+        <div class="tab active" data-tab="moments">Moments</div>
+        <div class="tab" data-tab="general">General rules</div>
+      </div>
+      <div id="momentsTab">
+        <div class="hint" id="progressText">0 / 0 answered</div>
+        <div class="progress"><div id="progressBar" style="width:0%"></div></div>
+        <div class="moment-list" id="momentList"></div>
+        <button type="button" class="secondary" id="nextBtn" style="width:100%">Next unanswered →</button>
+      </div>
+      <div id="generalTab" hidden class="stack"></div>
+    </section>
+
+    <section class="stack">
+      <div class="video-wrap">
+        <video id="player" controls preload="metadata" playsinline></video>
+      </div>
+      <div class="hint">
+        Shortcuts: <strong>N</strong> next · <strong>S</strong> save · <strong>Space</strong> play/pause ·
+        <strong>←/→</strong> ±2s
+      </div>
+      <button type="button" class="secondary" id="addMomentBtn">+ Label moment at playhead</button>
+    </section>
+
+    <section class="panel stack" id="formPanel">
+      <div class="bot-q" id="botQuestion">Select a moment from the list.</div>
+      <div class="row">
+        <div>
+          <label for="eventType">Event type</label>
+          <select id="eventType"></select>
+        </div>
+        <div>
+          <label for="clipWorthy">For entertaining clips</label>
+          <select id="clipWorthy"></select>
+        </div>
+      </div>
+      <div>
+        <label for="whatHappening">What is happening? (plain English)</label>
+        <textarea id="whatHappening" placeholder="e.g. Enemy team pushes right after we finish reviving"></textarea>
+      </div>
+      <div>
+        <label for="visualCues">What to LOOK for on screen (HUD, kill feed, UI)</label>
+        <textarea id="visualCues" placeholder="e.g. Death box appears bottom-right of knock"></textarea>
+      </div>
+      <div>
+        <label for="audioCues">What to HEAR (callouts, gunfire, shield break)</label>
+        <textarea id="audioCues" placeholder="e.g. Teammate says 'cracked' then knock sound"></textarea>
+      </div>
+      <div>
+        <label for="teachesBot">One-line rule for the bot</label>
+        <textarea id="teachesBot" placeholder="e.g. Team wipe ends when third death box spawns"></textarea>
+      </div>
+      <div class="row">
+        <button type="button" class="ok" id="saveBtn" disabled>Save & mark answered</button>
+        <button type="button" class="secondary" id="syncBtn">Sync to bot knowledge</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let store = { moments: [], general: [] };
+    let eventTypes = [];
+    let clipOptions = [];
+    let currentVod = "";
+    let selectedId = null;
+
+    const vodSelect = document.getElementById("vodSelect");
+    const player = document.getElementById("player");
+    const momentList = document.getElementById("momentList");
+    const generalTab = document.getElementById("generalTab");
+    const momentsTab = document.getElementById("momentsTab");
+    const formPanel = document.getElementById("formPanel");
+
+    function fmt(sec) {
+      const m = Math.floor(sec / 60);
+      const s = (sec % 60).toFixed(1);
+      return `${m}:${s.padStart(4, "0")}`;
+    }
+
+    function selectedMoment() {
+      return store.moments.find((m) => m.id === selectedId);
+    }
+
+    function updateProgress() {
+      const total = store.moments.length;
+      const done = store.moments.filter((m) => m.answered).length;
+      document.getElementById("progressText").textContent = `${done} / ${total} moments answered`;
+      document.getElementById("progressBar").style.width = total ? `${(done / total) * 100}%` : "0%";
+    }
+
+    function fillSelect(el, options) {
+      el.innerHTML = "";
+      for (const [value, label] of options) {
+        const opt = document.createElement("option");
+        opt.value = value;
+        opt.textContent = label;
+        el.appendChild(opt);
+      }
+    }
+
+    function renderMoments() {
+      momentList.innerHTML = "";
+      const groups = {};
+      for (const m of store.moments) {
+        const key = m.fight_label || m.fight_id || "Other";
+        (groups[key] = groups[key] || []).push(m);
+      }
+      for (const [group, items] of Object.entries(groups)) {
+        const hdr = document.createElement("div");
+        hdr.className = "fight-group";
+        hdr.textContent = group;
+        momentList.appendChild(hdr);
+        for (const m of items.sort((a, b) => a.timestamp_sec - b.timestamp_sec)) {
+          const el = document.createElement("div");
+          el.className = "moment-item" + (m.id === selectedId ? " active" : "") + (m.answered ? " done" : "");
+          el.innerHTML = `
+            <div class="moment-time">${fmt(m.timestamp_sec)} · ${m.category}</div>
+            <div class="moment-title">${m.title}</div>
+            <div class="moment-q">${m.bot_question}</div>
+          `;
+          el.onclick = () => selectMoment(m.id);
+          momentList.appendChild(el);
+        }
+      }
+      updateProgress();
+    }
+
+    function renderGeneral() {
+      generalTab.innerHTML = "";
+      for (const g of store.general) {
+        const box = document.createElement("div");
+        box.className = "general-item stack";
+        box.innerHTML = `<label>${g.prompt}</label>`;
+        const ta = document.createElement("textarea");
+        ta.value = g.answer || "";
+        ta.rows = 3;
+        const btn = document.createElement("button");
+        btn.className = "secondary";
+        btn.textContent = "Save";
+        btn.onclick = async () => {
+          await fetch(`/api/literacy/${currentVod}/general/${g.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ answer: ta.value }),
+          });
+          g.answer = ta.value;
+        };
+        box.appendChild(ta);
+        box.appendChild(btn);
+        generalTab.appendChild(box);
+      }
+    }
+
+    function loadForm(m) {
+      if (!m) {
+        document.getElementById("botQuestion").textContent = "Select a moment from the list.";
+        document.getElementById("saveBtn").disabled = true;
+        return;
+      }
+      document.getElementById("botQuestion").textContent = m.bot_question;
+      document.getElementById("eventType").value = m.event_type || "unknown";
+      document.getElementById("clipWorthy").value = m.clip_worthy || "unsure";
+      document.getElementById("whatHappening").value = m.what_happening || "";
+      document.getElementById("visualCues").value = m.visual_cues || "";
+      document.getElementById("audioCues").value = m.audio_cues || "";
+      document.getElementById("teachesBot").value = m.teaches_bot || "";
+      document.getElementById("saveBtn").disabled = false;
+    }
+
+    function seekMoment(m, lead = 2) {
+      player.currentTime = Math.max(0, m.timestamp_sec - lead);
+      player.play().catch(() => {});
+    }
+
+    function selectMoment(id) {
+      selectedId = id;
+      const m = selectedMoment();
+      renderMoments();
+      loadForm(m);
+      if (m) seekMoment(m);
+    }
+
+    function nextUnanswered() {
+      const next = store.moments.find((m) => !m.answered);
+      if (next) selectMoment(next.id);
+    }
+
+    function showError(msg) {
+      document.getElementById("botQuestion").innerHTML =
+        `<span style="color:#f31260">${msg}</span>`;
+    }
+
+    async function loadVods() {
+      const params = new URLSearchParams(location.search);
+      const req = params.get("vod");
+      let vods = [];
+      try {
+        const res = await fetch("/api/literacy/vods");
+        if (!res.ok) {
+          showError(
+            `API error ${res.status}. Stop the old server and run:<br>` +
+            `<code>python main.py --literacy 2788855626</code><br>` +
+            `Then open <strong>http://127.0.0.1:8081/literacy</strong> (port 8081, not 8080).`
+          );
+          return;
+        }
+        vods = await res.json();
+      } catch (err) {
+        showError("Cannot reach API — is the bot server running on port 8081?");
+        return;
+      }
+      vodSelect.innerHTML = "";
+      for (const v of vods) {
+        const opt = document.createElement("option");
+        opt.value = v.vod_id;
+        opt.textContent = `${v.vod_id} (${v.moment_count} moments)`;
+        vodSelect.appendChild(opt);
+      }
+      if (req) {
+        if (!vods.some((v) => v.vod_id === req)) {
+          const opt = document.createElement("option");
+          opt.value = req;
+          opt.textContent = `${req} (from URL)`;
+          vodSelect.appendChild(opt);
+        }
+        vodSelect.value = req;
+      }
+      if (vodSelect.value) await loadStore(vodSelect.value);
+    }
+
+    async function loadStore(vodId) {
+      currentVod = vodId;
+      const res = await fetch(`/api/literacy/${vodId}`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        showError(
+          `Could not load VOD ${vodId}: ${err.detail || res.status}. ` +
+          `Ensure data/${vodId}/*.mp4 exists.`
+        );
+        return;
+      }
+      const data = await res.json();
+      store = data;
+      eventTypes = data.event_types || [];
+      clipOptions = data.clip_worthy_options || [];
+      fillSelect(document.getElementById("eventType"), eventTypes);
+      fillSelect(document.getElementById("clipWorthy"), clipOptions);
+      player.src = data.video_url;
+      renderMoments();
+      renderGeneral();
+      if (!selectedId && store.moments.length) {
+        const first = store.moments.find((m) => !m.answered) || store.moments[0];
+        selectMoment(first.id);
+      }
+      history.replaceState(null, "", `?vod=${vodId}`);
+    }
+
+    document.getElementById("saveBtn").onclick = async () => {
+      const m = selectedMoment();
+      if (!m) return;
+      const body = {
+        event_type: document.getElementById("eventType").value,
+        clip_worthy: document.getElementById("clipWorthy").value,
+        what_happening: document.getElementById("whatHappening").value.trim(),
+        visual_cues: document.getElementById("visualCues").value.trim(),
+        audio_cues: document.getElementById("audioCues").value.trim(),
+        teaches_bot: document.getElementById("teachesBot").value.trim(),
+        answered: true,
+      };
+      const updated = await fetch(`/api/literacy/${currentVod}/moments/${m.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }).then((r) => r.json());
+      const idx = store.moments.findIndex((x) => x.id === m.id);
+      if (idx >= 0) store.moments[idx] = updated;
+      renderMoments();
+      nextUnanswered();
+    };
+
+    document.getElementById("syncBtn").onclick = async () => {
+      const res = await fetch(`/api/literacy/${currentVod}/sync`, { method: "POST" });
+      const data = await res.json();
+      alert(`Synced ${data.moments_answered} moments to bot knowledge file.`);
+    };
+
+    document.getElementById("nextBtn").onclick = nextUnanswered;
+
+    document.getElementById("addMomentBtn").onclick = async () => {
+      const title = prompt("Short title for this moment?", "Custom moment");
+      if (!title) return;
+      const question = prompt("What should the bot learn here?", "What is happening on screen?");
+      const created = await fetch(`/api/literacy/${currentVod}/moments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          timestamp_sec: player.currentTime,
+          title,
+          bot_question: question || "",
+        }),
+      }).then((r) => r.json());
+      store.moments.push(created);
+      store.moments.sort((a, b) => a.timestamp_sec - b.timestamp_sec);
+      selectMoment(created.id);
+    };
+
+    vodSelect.onchange = () => loadStore(vodSelect.value);
+
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.onclick = () => {
+        document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        const isGeneral = tab.dataset.tab === "general";
+        generalTab.hidden = !isGeneral;
+        momentsTab.hidden = isGeneral;
+        formPanel.hidden = isGeneral;
+      };
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.target.matches("input, textarea, select")) return;
+      if (e.key === "n" || e.key === "N") nextUnanswered();
+      if (e.key === "s" || e.key === "S") document.getElementById("saveBtn").click();
+      if (e.key === " ") { e.preventDefault(); player.paused ? player.play() : player.pause(); }
+      if (e.key === "ArrowLeft") player.currentTime = Math.max(0, player.currentTime - 2);
+      if (e.key === "ArrowRight") player.currentTime = Math.min(player.duration || 1e9, player.currentTime + 2);
+    });
+
+    loadVods();
+  </script>
+</body>
+</html>

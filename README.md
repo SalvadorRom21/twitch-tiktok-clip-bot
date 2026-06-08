@@ -203,18 +203,34 @@ Then fetch and process recent clips:
 python main.py --fetch-clips
 ```
 
-### LLM mode (optional)
+### LLM edit plans (recommended: Cursor — no OpenAI key)
 
-Set in `config.local.yaml`:
+The rule-based editor is fast but basic. For smarter montage cuts and hook text, use a **Cursor agent** as the editor:
+
+1. Get a key at [cursor.com/dashboard/integrations](https://cursor.com/dashboard/integrations)
+2. Add to `.env`:
+
+```env
+CURSOR_API_KEY=your_key_here
+```
+
+3. Enable in `config.local.yaml`:
 
 ```yaml
 llm:
   enabled: true
-  model: gpt-4o-mini
-  # base_url: https://api.groq.com/openai/v1  # for Groq, etc.
+  provider: cursor
+  cursor_model: composer-2.5
+
+analysis:
+  whisper_model: small
+  whisper_device: cuda        # NVIDIA GPU (e.g. RTX 4090)
+  whisper_compute_type: float16
 ```
 
-And set `OPENAI_API_KEY` in `.env`. Without this, the bot uses built-in rule-based editing.
+Re-run a clip — you should see `[plan] using Cursor edit plan` in the logs.
+
+**OpenAI alternative:** set `provider: openai`, `OPENAI_API_KEY` in `.env`, and optionally `base_url` for Groq/etc.
 
 ## Project layout
 

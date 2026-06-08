@@ -11,26 +11,18 @@ from twitch_tiktok_bot.models import (
     TimeRange,
     TranscriptSegment,
 )
-from twitch_tiktok_bot.plan.rules import (
-    EXCITING_WORDS,
-    _build_hashtags,
-    _collect_effects,
-    _overlaps,
-    _pick_montage_segments,
-    _score_window,
-)
+from twitch_tiktok_bot.plan.moments import PAYOFF_WORDS, build_hook_text, score_window
+from twitch_tiktok_bot.plan.refine import _collect_zooms, _default_hashtags, refine_plan
+from twitch_tiktok_bot.plan.rules import create_rule_based_plan
+
+
+def _segments_overlap(a: EditSegment, b: EditSegment, gap: float) -> bool:
+    return not (a.end + gap <= b.start or b.end + gap <= a.start)
 
 
 def _hook_for_window(analysis: ClipAnalysis, start: float, end: float) -> str:
-    for seg in analysis.transcript_segments:
-        if seg.start < start or seg.start > end:
-            continue
-        if EXCITING_WORDS.search(seg.text):
-            return seg.text[:60]
-        return seg.text[:60]
-    if analysis.clip_title:
-        return analysis.clip_title[:60]
-    return f"Stream highlight @ {int(start // 60)}m"
+    sliced = _slice_analysis(analysis, start, end)
+    return build_hook_text(sliced)
 
 
 def pick_vod_highlight_windows(
@@ -52,16 +44,16 @@ def pick_vod_highlight_windows(
         end = min(analysis.duration, start + target)
         if end - start < config.editing.min_duration_sec:
             start = max(0.0, end - config.editing.min_duration_sec)
-        score = _score_window(analysis, start, end)
+        score = score_window(analysis, start, end, config.editing.game_profile)
         candidates.append((score, start, end))
 
     for seg in analysis.transcript_segments:
-        if not EXCITING_WORDS.search(seg.text):
+        if not PAYOFF_WORDS.search(seg.text):
             continue
         mid = (seg.start + seg.end) / 2
         start = max(0.0, mid - half * 0.5)
         end = min(analysis.duration, start + target)
-        score = _score_window(analysis, start, end) + 2.0
+        score = score_window(analysis, start, end, config.editing.game_profile) + 2.0
         candidates.append((score, start, end))
 
     candidates.sort(key=lambda item: item[0], reverse=True)
@@ -72,7 +64,7 @@ def pick_vod_highlight_windows(
             break
         window = EditSegment(start=start, end=end)
         if any(
-            _overlaps(window, EditSegment(start=s, end=e), gap=min_gap)
+            _segments_overlap(window, EditSegment(start=s, end=e), gap=min_gap)
             for s, e in selected
         ):
             continue
@@ -88,9 +80,9 @@ def pick_vod_highlight_windows(
             end = min(start + target, analysis.duration)
             if end - start < config.editing.min_duration_sec:
                 continue
-            score = _score_window(analysis, start, end)
-            if score > best_score:
-                best_score = score
+            sc = score_window(analysis, start, end, config.editing.game_profile)
+            if sc > best_score:
+                best_score = sc
                 best_window = (start, end)
         selected = [best_window]
 
@@ -144,33 +136,36 @@ def create_vod_short_plans(
 
     for idx, (start, end) in enumerate(windows):
         sliced = _slice_analysis(analysis, start, end)
-        if config.editing.montage_enabled and (end - start) > config.editing.target_duration_sec:
-            segments = _pick_montage_segments(sliced, config)
+        if config.editing.montage_enabled and (
+            end - start
+        ) > config.editing.target_duration_sec:
+            inner = create_rule_based_plan(sliced, config)
             segments = [
                 EditSegment(
                     start=s.start + start,
                     end=s.end + start,
                     reason=s.reason,
                 )
-                for s in segments
+                for s in inner.segments
             ]
+            hook = inner.hook_text
+            effects = inner.effects
         else:
             segments = [EditSegment(start=start, end=end, reason="vod highlight")]
+            hook = _hook_for_window(analysis, start, end)
+            effects = _collect_zooms(analysis, segments, config)
 
-        effects = _collect_effects(analysis, segments, config)
-        hook = _hook_for_window(analysis, start, end)
         if analysis.clip_title and idx == 0:
-            hook = analysis.clip_title[:60]
+            hook = build_hook_text(sliced)
 
-        plans.append(
-            EditPlan(
-                target_duration_sec=sum(s.end - s.start for s in segments),
-                segments=segments,
-                effects=effects,
-                hook_text=hook,
-                hashtags=_build_hashtags(analysis) + ["vod", "stream"],
-                caption_style=config.editing.caption_style,
-            )
+        plan = EditPlan(
+            target_duration_sec=sum(s.end - s.start for s in segments),
+            segments=segments,
+            effects=effects,
+            hook_text=hook,
+            hashtags=_default_hashtags(analysis) + ["vod", "stream"],
+            caption_style=config.editing.caption_style,
         )
+        plans.append(refine_plan(plan, analysis, config))
 
     return plans
