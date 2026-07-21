@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Twitch Shorts Clip Bot</title>
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --text: #f2f2f7;
+      --muted: #9b9bb0;
+      --accent: #00f2ea;
+      --panel: #1a1a22;
+      --border: #2d2d3a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at top left, #1b1230, transparent 40%),
+        linear-gradient(180deg, #14141c, var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.55;
+    }
+    header, main, footer {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem;
+    }
+    header {
+      padding-top: 3rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(2rem, 5vw, 3rem);
+      letter-spacing: -0.03em;
+    }
+    .tag {
+      color: var(--muted);
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.95rem;
+    }
+    .panel {
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+    }
+    p { color: #d7d7e2; }
+    a { color: var(--accent); }
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1rem;
+      font-family: Inter, system-ui, sans-serif;
+      font-weight: 600;
+    }
+    footer {
+      color: var(--muted);
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Twitch Shorts Clip Bot</h1>
+    <p class="tag">Local desktop tool for turning Twitch clips and VODs into vertical shorts.</p>
+  </header>
+  <main>
+    <section class="panel">
+      <p>
+        This project helps a creator review, trim, caption, and publish their own
+        short-form clips to platforms like TikTok, YouTube Shorts, and Instagram.
+        It runs locally on the creator’s computer and only posts to accounts the
+        creator explicitly connects.
+      </p>
+      <p>
+        Source code:
+        <a href="https://github.com/SalvadorRom21/twitch-tiktok-clip-bot">github.com/SalvadorRom21/twitch-tiktok-clip-bot</a>
+      </p>
+      <div class="links">
+        <a href="./privacy.html">Privacy Policy</a>
+        <a href="./terms.html">Terms of Service</a>
+      </div>
+    </section>
+  </main>
+  <footer>
+    © <span id="y"></span> Twitch Shorts Clip Bot ·
+    <a href="./privacy.html">Privacy Policy</a> ·
+    <a href="./terms.html">Terms of Service</a>
+  </footer>
+  <script>document.getElementById("y").textContent = new Date().getFullYear();</script>
+</body>
+</html>

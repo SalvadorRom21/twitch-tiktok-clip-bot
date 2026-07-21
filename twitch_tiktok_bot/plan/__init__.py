@@ -1,3 +1,3 @@
-from .editor_llm import create_edit_plan
+"""Edit planning package — import submodules directly."""
 
-__all__ = ["create_edit_plan"]
+__all__: list[str] = []

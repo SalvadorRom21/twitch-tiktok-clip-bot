@@ -240,11 +240,25 @@ twitch_tiktok_bot/
   analyze/         # Whisper, audio peaks, face detection, vision
   plan/            # LLM + rule-based edit planning (montage)
   render/          # FFmpeg vertical render + face crop
-  web/             # FastAPI preview UI
+  publish/         # Trim, export packs (TT/IG/YT), YouTube Shorts upload
+  web/             # FastAPI preview + trainer UI
   pipeline.py      # End-to-end orchestration
 main.py            # CLI entrypoint
 config.yaml
 ```
+
+## Publish desk (edit → export → YouTube)
+
+1. Process a Twitch clip **or** in Elden trainer click **Send to publish** on a fight.
+2. Open `/` preview → select the ready short.
+3. Mark **In/Out** on the player → **Re-trim clip** → edit caption.
+4. **Export IG / YT / TT pack** → files land in `output/publish/{id}/` (one folder per platform with video + caption).
+5. TikTok / Instagram: open the pack folder and upload from your phone.
+6. YouTube Shorts (optional auto-upload):
+   - Enable **YouTube Data API v3** in Google Cloud
+   - Create an OAuth **Desktop** client, save JSON as `secrets/youtube_client_secret.json`
+   - `pip install google-api-python-client google-auth-oauthlib google-auth-httplib2`
+   - Click **Upload YouTube Short** (browser login once; default privacy is `private`)
 
 ## How “understanding” works
 
@@ -260,7 +274,8 @@ config.yaml
 - Add meme SFX in `assets/sfx/` and extend effect types in `plan/rules.py`
 - Tune `editing.peak_percentile` if zooms fire too often or too rarely
 - Swap Whisper model: `tiny` (fast) → `small` (better accuracy)
-- Hook up TikTok Content Posting API for auto-upload (not included yet)
+- TikTok / Instagram Content APIs later — today use export packs + mobile apps
+- YouTube Shorts auto-upload is supported via `publish/` (see Publish desk above)
 
 ## Limitations
 

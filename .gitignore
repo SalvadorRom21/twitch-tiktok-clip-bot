@@ -21,6 +21,11 @@ output/
 # Secrets
 .env
 config.local.yaml
+secrets/*.json
+!secrets/.gitkeep
+data/youtube_token.json
+data/tiktok_token.json
+data/instagram_token.json
 
 # IDE
 .idea/

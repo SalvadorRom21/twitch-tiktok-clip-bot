@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connections — YouTube / TikTok / Instagram</title>
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --panel: #1a1a22;
+      --border: #2d2d3a;
+      --text: #f2f2f7;
+      --muted: #9b9bb0;
+      --accent: #9146ff;
+      --accent-2: #00f2ea;
+      --ok: #3dd68c;
+      --warn: #f5a524;
+      --bad: #f31260;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background: radial-gradient(circle at top, #1b1230, var(--bg) 45%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    h1 { margin: 0; font-size: 1.25rem; }
+    .subtitle { color: var(--muted); font-size: 0.9rem; margin-top: 0.2rem; }
+    a { color: var(--accent-2); text-decoration: none; }
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem;
+      display: grid;
+      gap: 1.25rem;
+    }
+    .tabs {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .tab {
+      background: #2a2a38;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.45rem 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tab.active { background: var(--accent); border-color: var(--accent); }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.15rem 1.25rem;
+    }
+    h2 { margin: 0 0 0.75rem; font-size: 1.05rem; }
+    ol.steps {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+    ol.steps li { margin-bottom: 0.45rem; }
+    ol.steps strong { color: var(--text); }
+    code {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.82em;
+      color: var(--accent-2);
+    }
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.85rem;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: #12121a;
+    }
+    .pill.ok { border-color: #1f6b4a; color: var(--ok); }
+    .pill.warn { border-color: #6b4f14; color: var(--warn); }
+    .pill.bad { border-color: #6b1f35; color: var(--bad); }
+    .hint { color: var(--muted); font-size: 0.85rem; line-height: 1.4; }
+    .path {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.75rem;
+      color: var(--accent-2);
+      word-break: break-all;
+      margin-top: 0.5rem;
+    }
+    label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.35rem; }
+    input[type="file"], input[type="text"], input[type="password"], textarea, button {
+      font: inherit;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    textarea, input[type="text"], input[type="password"] {
+      width: 100%;
+      background: #12121a;
+      color: var(--text);
+      padding: 0.65rem 0.75rem;
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    input[type="file"] {
+      width: 100%;
+      background: #12121a;
+      color: var(--muted);
+      padding: 0.55rem;
+    }
+    button {
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.65rem 1rem;
+      font-weight: 600;
+    }
+    button.secondary { background: #2a2a38; }
+    button.ok { background: #1f6b4a; }
+    button.bad { background: #7a1f35; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+    .stack { display: grid; gap: 0.75rem; }
+    .msg {
+      margin-top: 0.75rem;
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+    .msg.ok { color: var(--ok); }
+    .msg.warn { color: var(--warn); }
+    .msg.bad { color: var(--bad); }
+    .platform { display: none; }
+    .platform.active { display: grid; gap: 1.25rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Connections</h1>
+      <div class="subtitle">Save API credentials and connect YouTube, TikTok, or Instagram</div>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+      <a href="/">Publish desk</a>
+      <a href="/train">Elden trainer</a>
+      <a href="/label">Fight labeler</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="tabs" id="tabs">
+      <button type="button" class="tab active" data-platform="youtube">YouTube</button>
+      <button type="button" class="tab" data-platform="tiktok">TikTok</button>
+      <button type="button" class="tab" data-platform="instagram">Instagram</button>
+    </div>
+
+    <!-- YouTube -->
+    <div class="platform active" id="platform-youtube">
+      <section class="panel">
+        <h2>YouTube status</h2>
+        <div class="status-row" id="yt-statusPills"></div>
+        <div class="hint" id="yt-statusHint">Loading…</div>
+        <div class="path" id="yt-secretsPath"></div>
+        <div class="path" id="yt-tokenPath"></div>
+      </section>
+      <section class="panel">
+        <h2>Setup checklist</h2>
+        <ol class="steps">
+          <li>Enable <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">YouTube Data API v3</a>.</li>
+          <li>Create an OAuth <strong>Desktop</strong> client in <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Credentials</a> and download the JSON.</li>
+          <li>Save the JSON below, then <strong>Connect Google</strong>.</li>
+          <li>If you see “app isn’t verified”, add yourself as a <a href="https://console.cloud.google.com/auth/audience" target="_blank" rel="noopener">Test user</a>, then Advanced → Continue.</li>
+        </ol>
+      </section>
+      <section class="panel stack">
+        <h2>1. Client secrets JSON</h2>
+        <div>
+          <label for="yt-file">Upload downloaded client JSON</label>
+          <input type="file" id="yt-file" accept=".json,application/json" />
+        </div>
+        <div>
+          <label for="yt-paste">Or paste JSON</label>
+          <textarea id="yt-paste" placeholder='{"installed":{"client_id":"...","client_secret":"..."}}'></textarea>
+        </div>
+        <div class="actions"><button type="button" id="yt-save">Save client secrets</button></div>
+        <div class="msg" id="yt-secretsMsg"></div>
+      </section>
+      <section class="panel">
+        <h2>2. Connect Google</h2>
+        <p class="hint">Opens a browser for Google login. Keep this tab open until it finishes.</p>
+        <div class="actions">
+          <button type="button" class="ok" id="yt-connect">Connect Google</button>
+          <button type="button" class="secondary" id="yt-reconnect">Reconnect</button>
+          <button type="button" class="bad" id="yt-disconnect">Disconnect</button>
+        </div>
+        <div class="msg" id="yt-authMsg"></div>
+      </section>
+    </div>
+
+    <!-- TikTok -->
+    <div class="platform" id="platform-tiktok">
+      <section class="panel">
+        <h2>TikTok status</h2>
+        <div class="status-row" id="tt-statusPills"></div>
+        <div class="hint" id="tt-statusHint">Loading…</div>
+        <div class="path" id="tt-secretsPath"></div>
+        <div class="path" id="tt-tokenPath"></div>
+        <div class="path" id="tt-redirectPath"></div>
+      </section>
+      <section class="panel">
+        <h2>Setup checklist</h2>
+        <ol class="steps">
+          <li>Create an app at <a href="https://developers.tiktok.com/apps/" target="_blank" rel="noopener">TikTok for Developers</a>.</li>
+          <li>Add <strong>Login Kit</strong> (Desktop) and <strong>Content Posting API</strong>. Request scopes: <code>user.info.basic</code>, <code>video.upload</code>, <code>video.publish</code>.</li>
+          <li>Register redirect URI exactly: <code id="tt-redirectHint">http://127.0.0.1:8766/callback/</code></li>
+          <li>Paste <strong>Client key</strong> + <strong>Client secret</strong> into the fields below, then <strong>Connect TikTok</strong>.</li>
+          <li>Use a <strong>Sandbox</strong> first if Content Posting isn’t approved yet. Export packs still work without API approval.</li>
+        </ol>
+      </section>
+      <section class="panel stack">
+        <h2>1. Client key + secret</h2>
+        <div>
+          <label for="tt-clientKey">Client key</label>
+          <input type="text" id="tt-clientKey" autocomplete="off" spellcheck="false" placeholder="Paste client key from TikTok developers" />
+        </div>
+        <div>
+          <label for="tt-clientSecret">Client secret</label>
+          <input type="password" id="tt-clientSecret" autocomplete="off" spellcheck="false" placeholder="Paste client secret" />
+        </div>
+        <div class="actions"><button type="button" id="tt-save">Save TikTok secrets</button></div>
+        <div class="hint">Or upload / paste a JSON file if you prefer:</div>
+        <div>
+          <label for="tt-file">Upload JSON file</label>
+          <input type="file" id="tt-file" accept=".json,application/json" />
+        </div>
+        <div>
+          <label for="tt-paste">Or paste JSON</label>
+          <textarea id="tt-paste" placeholder='{"client_key":"...","client_secret":"..."}'></textarea>
+        </div>
+        <div class="msg" id="tt-secretsMsg"></div>
+      </section>
+      <section class="panel">
+        <h2>2. Connect TikTok</h2>
+        <p class="hint">Opens TikTok login in your browser, then returns to localhost.</p>
+        <div class="actions">
+          <button type="button" class="ok" id="tt-connect">Connect TikTok</button>
+          <button type="button" class="secondary" id="tt-reconnect">Reconnect</button>
+          <button type="button" class="bad" id="tt-disconnect">Disconnect</button>
+        </div>
+        <div class="msg" id="tt-authMsg"></div>
+      </section>
+    </div>
+
+    <!-- Instagram -->
+    <div class="platform" id="platform-instagram">
+      <section class="panel">
+        <h2>Instagram status</h2>
+        <div class="status-row" id="ig-statusPills"></div>
+        <div class="hint" id="ig-statusHint">Loading…</div>
+        <div class="path" id="ig-secretsPath"></div>
+        <div class="path" id="ig-tokenPath"></div>
+        <div class="path" id="ig-redirectPath"></div>
+      </section>
+      <section class="panel">
+        <h2>Setup checklist</h2>
+        <ol class="steps">
+          <li>Create a Meta app at <a href="https://developers.facebook.com/apps/" target="_blank" rel="noopener">developers.facebook.com/apps</a>.</li>
+          <li>Add <strong>Instagram</strong> → <strong>API setup with Instagram login</strong> (Professional / Business account required).</li>
+          <li>Add OAuth redirect URI exactly: <code id="ig-redirectHint">http://127.0.0.1:8765/callback/</code></li>
+          <li>Request scopes <code>instagram_business_basic</code> and <code>instagram_business_content_publish</code>.</li>
+          <li>Paste <strong>App ID</strong> + <strong>App Secret</strong> below, then <strong>Connect Instagram</strong>.</li>
+          <li>Until Meta approves advanced access, only app roles / testers can connect. Export packs still work without API.</li>
+        </ol>
+      </section>
+      <section class="panel stack">
+        <h2>1. App ID + secret</h2>
+        <div>
+          <label for="ig-file">Upload JSON file</label>
+          <input type="file" id="ig-file" accept=".json,application/json" />
+        </div>
+        <div>
+          <label for="ig-paste">Or paste JSON</label>
+          <textarea id="ig-paste" placeholder='{"app_id":"...","app_secret":"..."}'></textarea>
+        </div>
+        <div class="actions"><button type="button" id="ig-save">Save Instagram secrets</button></div>
+        <div class="msg" id="ig-secretsMsg"></div>
+      </section>
+      <section class="panel">
+        <h2>2. Connect Instagram</h2>
+        <p class="hint">Opens Instagram / Meta login in your browser, then returns to localhost.</p>
+        <div class="actions">
+          <button type="button" class="ok" id="ig-connect">Connect Instagram</button>
+          <button type="button" class="secondary" id="ig-reconnect">Reconnect</button>
+          <button type="button" class="bad" id="ig-disconnect">Disconnect</button>
+        </div>
+        <div class="msg" id="ig-authMsg"></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const platforms = {
+      youtube: {
+        prefix: "yt",
+        label: "YouTube",
+        connectLabel: "Google",
+        statusUrl: "/api/publish/youtube/status",
+        secretsUrl: "/api/publish/youtube/secrets",
+        secretsJsonUrl: "/api/publish/youtube/secrets/json",
+        authorizeUrl: "/api/publish/youtube/authorize",
+        authorizeJobUrl: (id) => `/api/publish/youtube/authorize/${id}`,
+        disconnectUrl: "/api/publish/youtube/token",
+        placeholderConfigured: "Client JSON saved",
+        placeholderNeed: "Need client JSON",
+        connected: "Google connected",
+      },
+      tiktok: {
+        prefix: "tt",
+        label: "TikTok",
+        connectLabel: "TikTok",
+        statusUrl: "/api/publish/tiktok/status",
+        secretsUrl: "/api/publish/tiktok/secrets",
+        secretsJsonUrl: "/api/publish/tiktok/secrets/json",
+        authorizeUrl: "/api/publish/tiktok/authorize",
+        authorizeJobUrl: (id) => `/api/publish/tiktok/authorize/${id}`,
+        disconnectUrl: "/api/publish/tiktok/token",
+        placeholderConfigured: "Client key saved",
+        placeholderNeed: "Need client key",
+        connected: "TikTok connected",
+      },
+      instagram: {
+        prefix: "ig",
+        label: "Instagram",
+        connectLabel: "Instagram",
+        statusUrl: "/api/publish/instagram/status",
+        secretsUrl: "/api/publish/instagram/secrets",
+        secretsJsonUrl: "/api/publish/instagram/secrets/json",
+        authorizeUrl: "/api/publish/instagram/authorize",
+        authorizeJobUrl: (id) => `/api/publish/instagram/authorize/${id}`,
+        disconnectUrl: "/api/publish/instagram/token",
+        placeholderConfigured: "App ID saved",
+        placeholderNeed: "Need app ID",
+        connected: "Instagram connected",
+      },
+    };
+
+    const pollTimers = {};
+
+    function $(id) { return document.getElementById(id); }
+    function pill(label, kind) {
+      return `<span class="pill ${kind}">${label}</span>`;
+    }
+    function setMsg(el, text, kind) {
+      el.textContent = text || "";
+      el.className = "msg" + (kind ? ` ${kind}` : "");
+    }
+
+    function showPlatform(name) {
+      document.querySelectorAll(".tab").forEach((t) => {
+        t.classList.toggle("active", t.dataset.platform === name);
+      });
+      document.querySelectorAll(".platform").forEach((p) => {
+        p.classList.toggle("active", p.id === `platform-${name}`);
+      });
+      history.replaceState(null, "", `#${name}`);
+      refreshPlatform(name);
+    }
+
+    function renderStatus(name, data) {
+      const p = platforms[name];
+      const pre = p.prefix;
+      const deps = data.deps_ok === false
+        ? pill("Deps missing", "bad")
+        : pill("Ready", "ok");
+      const cfg = data.configured
+        ? pill(p.placeholderConfigured, "ok")
+        : pill(p.placeholderNeed, "warn");
+      const auth = data.authorized
+        ? pill(p.connected, "ok")
+        : pill(data.auth_in_progress ? "Waiting for browser…" : "Not connected", "warn");
+      $(`${pre}-statusPills`).innerHTML = deps + cfg + auth;
+      $(`${pre}-statusHint`).textContent = data.hint || data.note || "";
+      $(`${pre}-secretsPath`).textContent = data.client_secrets_file
+        ? `Secrets: ${data.client_secrets_file}` : "";
+      $(`${pre}-tokenPath`).textContent = data.token_file
+        ? `Token: ${data.token_file}` : "";
+      const redirectEl = $(`${pre}-redirectPath`);
+      if (redirectEl) {
+        redirectEl.textContent = data.redirect_uri
+          ? `Redirect URI: ${data.redirect_uri}` : "";
+      }
+      const hintCode = $(`${pre}-redirectHint`);
+      if (hintCode && data.redirect_uri) hintCode.textContent = data.redirect_uri;
+
+      const connectBtn = $(`${pre}-connect`);
+      const reconnectBtn = $(`${pre}-reconnect`);
+      const disconnectBtn = $(`${pre}-disconnect`);
+      const depsOk = data.deps_ok !== false;
+      connectBtn.disabled = !depsOk || !data.configured || data.auth_in_progress || data.authorized;
+      reconnectBtn.disabled = !depsOk || !data.configured || data.auth_in_progress;
+      disconnectBtn.disabled = !(data.authorized || data.token_exists);
+    }
+
+    async function refreshPlatform(name) {
+      const p = platforms[name];
+      const res = await fetch(p.statusUrl);
+      const data = await res.json();
+      renderStatus(name, data);
+      return data;
+    }
+
+    async function saveSecrets(name) {
+      const p = platforms[name];
+      const pre = p.prefix;
+      const msg = $(`${pre}-secretsMsg`);
+      setMsg(msg, "Saving…", "warn");
+      const fileInput = $(`${pre}-file`);
+      const paste = $(`${pre}-paste`).value.trim();
+      let res;
+
+      // TikTok: prefer plain key/secret fields (portal doesn't give a JSON file)
+      if (name === "tiktok") {
+        const key = ($("tt-clientKey").value || "").trim();
+        const secret = ($("tt-clientSecret").value || "").trim();
+        if (key && secret) {
+          res = await fetch(p.secretsJsonUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              json_text: JSON.stringify({ client_key: key, client_secret: secret }),
+            }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            setMsg(msg, data.detail || "Save failed", "bad");
+            return;
+          }
+          setMsg(msg, `Saved to ${data.path}`, "ok");
+          $("tt-clientSecret").value = "";
+          fileInput.value = "";
+          await refreshPlatform(name);
+          return;
+        }
+      }
+
+      if (fileInput.files && fileInput.files[0]) {
+        const fd = new FormData();
+        fd.append("file", fileInput.files[0]);
+        res = await fetch(p.secretsUrl, { method: "POST", body: fd });
+      } else if (paste) {
+        res = await fetch(p.secretsJsonUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ json_text: paste }),
+        });
+      } else {
+        setMsg(
+          msg,
+          name === "tiktok"
+            ? "Enter client key and client secret (or upload/paste JSON)."
+            : "Choose a JSON file or paste credentials.",
+          "bad"
+        );
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setMsg(msg, data.detail || "Save failed", "bad");
+        return;
+      }
+      setMsg(msg, `Saved to ${data.path}`, "ok");
+      fileInput.value = "";
+      await refreshPlatform(name);
+    }
+
+    async function pollAuth(name, jobId) {
+      const p = platforms[name];
+      const msg = $(`${p.prefix}-authMsg`);
+      clearInterval(pollTimers[name]);
+      pollTimers[name] = setInterval(async () => {
+        const res = await fetch(p.authorizeJobUrl(jobId));
+        if (!res.ok) return;
+        const job = await res.json();
+        setMsg(msg, job.message || job.status, job.status === "failed" ? "bad" : "warn");
+        if (job.status === "done") {
+          clearInterval(pollTimers[name]);
+          setMsg(msg, `${p.label} connected.`, "ok");
+          await refreshPlatform(name);
+        } else if (job.status === "failed") {
+          clearInterval(pollTimers[name]);
+          setMsg(msg, job.error || "Authorization failed", "bad");
+          await refreshPlatform(name);
+        }
+      }, 1200);
+    }
+
+    async function connect(name, force) {
+      const p = platforms[name];
+      const pre = p.prefix;
+      const msg = $(`${pre}-authMsg`);
+      setMsg(msg, `Starting ${p.connectLabel} login… a browser window should open.`, "warn");
+      $(`${pre}-connect`).disabled = true;
+      $(`${pre}-reconnect`).disabled = true;
+      const res = await fetch(p.authorizeUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ force: !!force }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setMsg(msg, data.detail || "Could not start auth", "bad");
+        await refreshPlatform(name);
+        return;
+      }
+      if (data.job_id) {
+        setMsg(msg, `Waiting for ${p.connectLabel} login in your browser…`, "warn");
+        await pollAuth(name, data.job_id);
+      }
+      await refreshPlatform(name);
+    }
+
+    async function disconnect(name) {
+      const p = platforms[name];
+      if (!confirm(`Disconnect ${p.label}?`)) return;
+      const msg = $(`${p.prefix}-authMsg`);
+      const res = await fetch(p.disconnectUrl, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setMsg(msg, data.detail || "Disconnect failed", "bad");
+        return;
+      }
+      setMsg(msg, "Disconnected.", "ok");
+      await refreshPlatform(name);
+    }
+
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.onclick = () => showPlatform(tab.dataset.platform);
+    });
+
+    ["youtube", "tiktok", "instagram"].forEach((name) => {
+      const pre = platforms[name].prefix;
+      $(`${pre}-save`).onclick = () => saveSecrets(name);
+      $(`${pre}-connect`).onclick = () => connect(name, false);
+      $(`${pre}-reconnect`).onclick = () => connect(name, true);
+      $(`${pre}-disconnect`).onclick = () => disconnect(name);
+    });
+
+    const initial = (location.hash || "#youtube").replace("#", "");
+    showPlatform(platforms[initial] ? initial : "youtube");
+  </script>
+</body>
+</html>

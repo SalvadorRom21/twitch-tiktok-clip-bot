@@ -33,3 +33,23 @@ vod:
 #   enabled: true
 #   provider: cursor
 #   cursor_model: composer-2.5
+
+# Publish desk — platform auth (Connections UI at /auth)
+# YouTube: Desktop OAuth JSON → Connect Google
+# TikTok: client_key/secret + Login Kit redirect http://127.0.0.1:8766/callback/
+# Instagram: Meta app_id/secret + redirect http://127.0.0.1:8765/callback/
+# Export packs still work without API auth (phone upload).
+publish:
+  youtube:
+    client_secrets_file: secrets/youtube_client_secret.json
+    token_file: data/youtube_token.json
+    category_id: "20"
+    privacy_status: private
+  tiktok:
+    client_secrets_file: secrets/tiktok_client_secret.json
+    token_file: data/tiktok_token.json
+    oauth_port: 8766
+  instagram:
+    client_secrets_file: secrets/instagram_client_secret.json
+    token_file: data/instagram_token.json
+    oauth_port: 8765

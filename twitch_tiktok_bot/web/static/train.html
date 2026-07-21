@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elden Ring Boss Clips</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --panel: #14141c;
+      --border: #2a2a38;
+      --text: #f2f2f7;
+      --muted: #9b9bb0;
+      --accent: #c9a227;
+      --accent-2: #00f2ea;
+      --ok: #3dd68c;
+      --bad: #f31260;
+      --warn: #f5a524;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background: radial-gradient(circle at top, #1a1208, var(--bg) 50%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    h1 { margin: 0; font-size: 1.2rem; color: var(--accent); }
+    .subtitle { color: var(--muted); font-size: 0.85rem; }
+    a { color: var(--accent-2); text-decoration: none; }
+    main {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1rem;
+      padding: 1rem 1.5rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    @media (max-width: 960px) { main { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    .stack { display: flex; flex-direction: column; gap: 0.75rem; }
+    label { font-size: 0.82rem; color: var(--muted); display: block; margin-bottom: 0.3rem; }
+    input, textarea, select, button {
+      font: inherit;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    input, textarea, select {
+      width: 100%;
+      background: #0c0c12;
+      color: var(--text);
+      padding: 0.55rem 0.7rem;
+    }
+    button {
+      cursor: pointer;
+      background: var(--accent);
+      color: #111;
+      border: none;
+      padding: 0.55rem 0.85rem;
+      font-weight: 600;
+    }
+    button.secondary { background: #2a2a38; color: var(--text); }
+    button.ok { background: #1f6b4a; color: white; }
+    button.danger { background: #6b1f2a; color: #ffe8ea; border: 1px solid #a33; }
+    button.danger:hover { background: #8a2838; }
+    button.danger:disabled, button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .hint { color: var(--muted); font-size: 0.85rem; line-height: 1.4; }
+    .vod-item {
+      padding: 0.65rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.88rem;
+    }
+    .vod-item:hover, .vod-item.active {
+      border-color: var(--accent);
+      background: rgba(201, 162, 39, 0.12);
+    }
+    .vod-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    .vod-row .vod-main { flex: 1; min-width: 0; }
+    button.vod-del {
+      flex-shrink: 0;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      background: #2a2a38;
+      color: #f88;
+      border: 1px solid #5a3038;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .badge.scanning { background: rgba(245,165,36,0.2); color: var(--warn); }
+    .badge.done { background: rgba(61,214,140,0.15); color: var(--ok); }
+    .badge.failed, .badge.idle { background: rgba(155,155,176,0.2); color: var(--muted); }
+    video {
+      width: 100%;
+      border-radius: 10px;
+      background: #000;
+      max-height: 56vh;
+    }
+    .timing-editor {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #0c0c12;
+    }
+    .timing-editor .te-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .timing-editor .te-label {
+      min-width: 2.2rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .timing-editor .te-time {
+      min-width: 4.5rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent-2);
+    }
+    .timing-editor button.te-btn {
+      background: #24243a;
+      color: var(--text);
+      padding: 0.35rem 0.55rem;
+      font-size: 0.8rem;
+    }
+    .timing-editor .te-summary { font-size: 0.85rem; color: var(--muted); }
+    .timing-editor .te-summary b { color: var(--accent-2); }
+    .timing-editor .te-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .cand-card {
+      padding: 0.65rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.88rem;
+    }
+    .cand-card.active {
+      border-color: var(--accent);
+      background: rgba(201, 162, 39, 0.12);
+    }
+    .clip-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #0c0c12;
+    }
+    .clip-row {
+      display: block;
+      padding: 0.55rem 0.65rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.86rem;
+      cursor: pointer;
+    }
+    .clip-row:last-child { border-bottom: none; }
+    .clip-row:hover { background: rgba(255, 255, 255, 0.03); }
+    .clip-row.active {
+      background: rgba(201, 162, 39, 0.14);
+      box-shadow: inset 3px 0 0 var(--accent);
+    }
+    .clip-row-main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .clip-row-title {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .clip-row-sub {
+      color: var(--muted);
+      font-size: 0.78rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .selection-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.35rem;
+    }
+    .selection-actions button {
+      flex: 1 1 7rem;
+      min-width: 6.5rem;
+    }
+    .selection-hint {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 0.25rem;
+    }
+    .clip-pager {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-top: 0.55rem;
+    }
+    .clip-pager[hidden] { display: none; }
+    .clip-pager .hint { margin: 0; }
+    .clip-pager .pager-btns {
+      display: flex;
+      gap: 0.35rem;
+    }
+    .clip-pager button {
+      padding: 0.35rem 0.65rem;
+      font-size: 0.8rem;
+    }
+    .job-progress { display: none; margin-top: 0.35rem; }
+    .job-progress.active { display: block; }
+    .job-progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+    .job-progress-meta strong { color: var(--accent-2); font-weight: 600; }
+    .job-bar {
+      height: 8px;
+      background: #0c0c12;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .job-bar > div {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 0.35s ease;
+    }
+    .job-bar.indeterminate > div {
+      width: 35% !important;
+      animation: jobSlide 1.2s ease-in-out infinite;
+    }
+    @keyframes jobSlide {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(320%); }
+    }
+    .danger-zone {
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px dashed var(--border);
+    }
+    .danger-zone summary {
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 0.85rem;
+      user-select: none;
+    }
+    .clip-fold {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #12121a;
+      padding: 0.55rem 0.75rem;
+    }
+    .clip-fold > summary {
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      user-select: none;
+      font-weight: 600;
+    }
+    .clip-fold > summary::-webkit-details-marker { display: none; }
+    .clip-fold > summary::before {
+      content: "▸";
+      color: var(--muted);
+      font-size: 0.85rem;
+      width: 0.9rem;
+      flex-shrink: 0;
+    }
+    .clip-fold[open] > summary::before { content: "▾"; }
+    .clip-fold .fold-meta {
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+    .clip-fold .fold-body {
+      margin-top: 0.65rem;
+      padding-top: 0.65rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+    .modal-backdrop[hidden] { display: none; }
+    .modal-card {
+      background: #14141c;
+      border: 1px solid #a33;
+      border-radius: 10px;
+      padding: 1.25rem;
+      max-width: 420px;
+      width: 100%;
+    }
+    .modal-card h3 { margin: 0 0 0.5rem; color: #f88; }
+    .modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap; }
+    .editor-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Elden Ring — Clip Trainer</h1>
+      <div class="subtitle">Upload a VOD · mark attempt In/Out · train the model</div>
+    </div>
+    <nav><a href="/">Preview</a> · <a href="/auth">Auth</a> · <a href="/label">Label</a></nav>
+  </header>
+
+  <main>
+    <aside class="stack">
+      <div class="panel stack">
+        <strong>1. Upload VOD</strong>
+        <input type="file" id="fileInput" accept="video/mp4,video/webm,video/quicktime,.mp4,.mkv,.webm,.mov" />
+        <input id="uploadTitle" placeholder="Title (optional)" />
+        <button id="uploadBtn">Upload</button>
+        <div class="hint" id="uploadStatus"></div>
+        <div class="job-progress" id="uploadProgress">
+          <div class="job-progress-meta">
+            <span id="uploadProgressLabel">Uploading…</span>
+            <span id="uploadProgressEta"></span>
+          </div>
+          <div class="job-bar"><div id="uploadProgressFill"></div></div>
+        </div>
+      </div>
+
+      <div class="panel stack">
+        <strong>2. Your VODs</strong>
+        <div id="vodList" class="stack"></div>
+        <button class="secondary" id="refreshBtn">Refresh</button>
+      </div>
+
+      <div class="panel stack">
+        <strong>3. Detect attempts</strong>
+        <div id="mlCounts" class="hint">No labels yet.</div>
+        <div id="statsBox" class="hint"></div>
+        <div class="hint">
+          Pattern: mist door / enter → boss red HP bar appears → fight (phase
+          cinematics may hide HUD temporarily) → either <em>YOU DIED</em>
+          (bar may still be full/partial) or bar empties →
+          <em>ENEMY FELLED</em> / <em>GREAT ENEMY FELLED</em> → cut shortly after.
+          Optional ML assist when labels exist.
+        </div>
+        <button class="secondary" id="scanBtn" disabled>Scan VOD for attempts</button>
+        <div class="job-progress" id="scanProgress">
+          <div class="job-progress-meta">
+            <span id="scanProgressLabel">Scanning…</span>
+            <span id="scanProgressEta"></span>
+          </div>
+          <div class="job-bar"><div id="scanProgressFill"></div></div>
+        </div>
+        <div class="hint" id="scanStatus"></div>
+        <button class="secondary" id="mericaPackBtn">Load Merica hard-neg pack</button>
+        <div class="hint" id="mericaPackStatus"></div>
+        <button id="mlTrainBtn">Train optional ML assist</button>
+        <div class="job-progress" id="mlTrainProgress">
+          <div class="job-progress-meta">
+            <span id="mlTrainProgressLabel">Training…</span>
+            <span id="mlTrainProgressEta"></span>
+          </div>
+          <div class="job-bar"><div id="mlTrainProgressFill"></div></div>
+        </div>
+        <div class="hint" id="mlTrainStatus"></div>
+        <button class="secondary" id="retuneBtn">Re-scan all VODs</button>
+        <div class="job-progress" id="retuneProgress">
+          <div class="job-progress-meta">
+            <span id="retuneProgressLabel">Re-scanning…</span>
+            <span id="retuneProgressEta"></span>
+          </div>
+          <div class="job-bar"><div id="retuneProgressFill"></div></div>
+        </div>
+        <div class="hint" id="retuneBox" hidden></div>
+        <details class="danger-zone">
+          <summary>Reset / delete</summary>
+          <p class="hint">Reset ML labels &amp; model. Type <strong>START FRESH</strong>.</p>
+          <button class="danger" id="resetBtn" type="button">Reset…</button>
+          <p class="hint">Delete all uploads. Type <strong>DELETE ALL VODS</strong>.</p>
+          <button class="danger" id="deleteAllVodsBtn" type="button">Delete all uploads…</button>
+        </details>
+      </div>
+    </aside>
+
+    <section class="panel stack" id="clipEditorPanel">
+      <div class="editor-head">
+        <div>
+          <strong>Clip editor</strong>
+          <span class="badge idle" id="scanBadge">idle</span>
+          <div class="hint" id="clipEditorVodLabel">Upload or select a VOD to start editing.</div>
+        </div>
+      </div>
+
+      <video id="editorPlayer" controls playsinline></video>
+      <div class="selection-actions" id="selectionActions">
+        <button type="button" class="secondary" id="selEditBtn" disabled>Edit</button>
+        <button type="button" class="secondary" id="selJumpBtn" disabled>Jump</button>
+        <button type="button" id="selPublishBtn" disabled>Send to publish</button>
+        <button type="button" class="danger" id="selDeleteBtn" disabled>Delete</button>
+      </div>
+      <div class="selection-hint" id="selectionHint">Select a saved or found clip below to preview it here.</div>
+      <div class="job-progress" id="publishProgress">
+        <div class="job-progress-meta">
+          <span id="publishProgressLabel">Trimming…</span>
+          <span id="publishProgressEta"></span>
+        </div>
+        <div class="job-bar"><div id="publishProgressFill"></div></div>
+      </div>
+
+      <div class="timing-editor" id="clipMarkEditor">
+        <div class="te-row">
+          <span class="te-label">In</span>
+          <span class="te-time" id="edInLabel">—</span>
+          <button type="button" class="te-btn" id="edMarkIn">[ Mark In</button>
+          <button type="button" class="te-btn" id="edSeekIn">Seek In</button>
+          <button type="button" class="te-btn" id="edNudgeInBack">−1s</button>
+          <button type="button" class="te-btn" id="edNudgeInFwd">+1s</button>
+        </div>
+        <div class="te-row">
+          <span class="te-label">Out</span>
+          <span class="te-time" id="edOutLabel">—</span>
+          <button type="button" class="te-btn" id="edMarkOut">] Mark Out</button>
+          <button type="button" class="te-btn" id="edSeekOut">Seek Out</button>
+          <button type="button" class="te-btn" id="edNudgeOutBack">−1s</button>
+          <button type="button" class="te-btn" id="edNudgeOutFwd">+1s</button>
+        </div>
+        <div class="te-summary" id="edSummary">Keys: [ In · ] Out · \ preview</div>
+        <div class="te-actions">
+          <button type="button" class="te-btn" id="edPlayRange">▶ Preview clip</button>
+          <button type="button" class="te-btn" id="edClearMarks">Clear marks</button>
+        </div>
+      </div>
+
+      <label for="edKind">What is this clip?</label>
+      <select id="edKind">
+        <option value="you_died">Boss attempt → YOU DIED</option>
+        <option value="enemy_felled">Boss attempt → ENEMY FELLED</option>
+        <option value="incomplete">Boss attempt (still fighting)</option>
+        <option value="not_fight">Not a fight (cutscene / explore / trash)</option>
+      </select>
+      <textarea id="edNotes" rows="2" placeholder="Optional notes"></textarea>
+      <button id="edSaveClip" disabled>Save clip &amp; add training frames</button>
+      <button type="button" class="secondary" id="edCancelEdit" hidden>Cancel edit</button>
+      <div class="hint" id="edSaveStatus"></div>
+      <div class="job-progress" id="edSaveProgress">
+        <div class="job-progress-meta">
+          <span id="edSaveProgressLabel">Saving…</span>
+          <span id="edSaveProgressEta"></span>
+        </div>
+        <div class="job-bar"><div id="edSaveProgressFill"></div></div>
+      </div>
+
+      <details class="clip-fold" id="savedClipsFold">
+        <summary>
+          <span>Saved clips (your labels)</span>
+          <span class="fold-meta" id="savedClipsCount">0</span>
+        </summary>
+        <div class="fold-body">
+          <div class="hint">Click a row to preview. Use the buttons under the player for Edit / Jump / Publish / Delete.</div>
+          <div id="edClipList" class="clip-list">
+            <div class="hint" style="padding:0.65rem;">Loading clips…</div>
+          </div>
+          <div class="clip-pager" id="savedClipsPager" hidden>
+            <span class="hint" id="savedClipsPageLabel"></span>
+            <div class="pager-btns">
+              <button type="button" class="secondary" id="savedClipsPrev">Prev</button>
+              <button type="button" class="secondary" id="savedClipsNext">Next</button>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="clip-fold" id="botDetectFold">
+        <summary>
+          <span>Bot detections (found clips)</span>
+          <span class="fold-meta" id="botDetectCount">0</span>
+        </summary>
+        <div class="fold-body">
+          <div class="hint">Click a detection to preview it in the player above.</div>
+          <div id="botDetectList" class="clip-list">
+            <div class="hint" style="padding:0.65rem;">No scan yet — select a VOD and click Scan.</div>
+          </div>
+          <div class="clip-pager" id="botDetectPager" hidden>
+            <span class="hint" id="botDetectPageLabel"></span>
+            <div class="pager-btns">
+              <button type="button" class="secondary" id="botDetectPrev">Prev</button>
+              <button type="button" class="secondary" id="botDetectNext">Next</button>
+            </div>
+          </div>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <div id="resetModal" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog">
+      <h3>Erase all Elden training?</h3>
+      <p class="hint">Labels, model, and scans will be deleted. Videos stay.</p>
+      <label for="resetConfirmInput">Type <strong>START FRESH</strong>:</label>
+      <input id="resetConfirmInput" type="text" autocomplete="off" spellcheck="false" placeholder="START FRESH" />
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="resetCancelBtn">Cancel</button>
+        <button type="button" class="danger" id="resetConfirmBtn" disabled>Yes, erase</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="deleteAllModal" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog">
+      <h3>Delete all uploaded VODs?</h3>
+      <p class="hint">Removes every upload. Cannot be undone.</p>
+      <label for="deleteAllConfirmInput">Type <strong>DELETE ALL VODS</strong>:</label>
+      <input id="deleteAllConfirmInput" type="text" autocomplete="off" spellcheck="false" placeholder="DELETE ALL VODS" />
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="deleteAllCancelBtn">Cancel</button>
+        <button type="button" class="danger" id="deleteAllConfirmBtn" disabled>Yes, delete all</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentVod = null;
+    let store = null;
+    let scan = null;
+    let edIn = null;
+    let edOut = null;
+    let edPreviewLock = false;
+    let editingClipId = null;
+    const CLIP_PAGE_SIZE = 10;
+    let savedClipsCache = [];
+    let savedClipsPage = 0;
+    let botDetectPage = 0;
+    // { type: "saved"|"found", id?, vodId, start, end, clip? }
+    let selectedClip = null;
+
+    const editorPlayer = document.getElementById("editorPlayer");
+    const selEditBtn = document.getElementById("selEditBtn");
+    const selJumpBtn = document.getElementById("selJumpBtn");
+    const selPublishBtn = document.getElementById("selPublishBtn");
+    const selDeleteBtn = document.getElementById("selDeleteBtn");
+    const selectionHint = document.getElementById("selectionHint");
+
+    function pageSlice(items, page) {
+      const total = items.length;
+      const pages = Math.max(1, Math.ceil(total / CLIP_PAGE_SIZE) || 1);
+      const safe = Math.min(Math.max(0, page), pages - 1);
+      const start = safe * CLIP_PAGE_SIZE;
+      return {
+        page: safe,
+        pages,
+        total,
+        items: items.slice(start, start + CLIP_PAGE_SIZE),
+        startIndex: start,
+      };
+    }
+
+    function updatePager(pagerId, labelId, pageInfo, prevId, nextId) {
+      const pager = document.getElementById(pagerId);
+      const label = document.getElementById(labelId);
+      if (!pager || !label) return;
+      if (pageInfo.total <= CLIP_PAGE_SIZE) {
+        pager.hidden = true;
+        return;
+      }
+      pager.hidden = false;
+      label.textContent = `Page ${pageInfo.page + 1} / ${pageInfo.pages} · ${pageInfo.total} total`;
+      const prev = document.getElementById(prevId);
+      const next = document.getElementById(nextId);
+      if (prev) prev.disabled = pageInfo.page <= 0;
+      if (next) next.disabled = pageInfo.page >= pageInfo.pages - 1;
+    }
+
+    async function publishWindow(vodId, start, end, defaultTitle) {
+      if (!vodId) {
+        alert("No VOD selected for this clip.");
+        return;
+      }
+      if (!(Number(end) > Number(start))) {
+        alert("Clip window is invalid (end must be after start).");
+        return;
+      }
+      const title = prompt("Title for this short?", defaultTitle || `Boss fight ${fmt(start)}`);
+      if (title === null) return;
+      const captionDefault = `${title}\n\n#eldenring #bossfight #fyp`;
+      const caption = prompt("Caption (hashtags ok):", captionDefault.replace(/\n/g, " | "));
+      if (caption === null) return;
+      const captionText = caption.includes(" | ")
+        ? caption.split(" | ").join("\n")
+        : caption;
+
+      const clipDur = Math.max(0.5, Number(end) - Number(start));
+      selPublishBtn.disabled = true;
+      setJobProgress("publish", {
+        active: true,
+        pct: 1,
+        label: `Starting trim of ${Math.round(clipDur)}s clip…`,
+        eta: "estimating…",
+        indeterminate: true,
+      });
+      selectionHint.textContent = "Trimming for publish — ETA updates as FFmpeg encodes.";
+
+      try {
+        const res = await fetch(`/api/train/${encodeURIComponent(vodId)}/publish`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            start_sec: Number(start),
+            end_sec: Number(end),
+            title,
+            caption: captionText,
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const detail = Array.isArray(data.detail)
+            ? data.detail.map((d) => d.msg || JSON.stringify(d)).join("; ")
+            : (data.detail || res.statusText || "Could not start publish");
+          alert(detail);
+          setJobProgress("publish", { active: false, pct: 0 });
+          updateSelectionUi();
+          return;
+        }
+        const jobId = data.job_id;
+        if (!jobId) {
+          alert("Publish started but no job_id returned.");
+          setJobProgress("publish", { active: false, pct: 0 });
+          updateSelectionUi();
+          return;
+        }
+
+        const poll = async () => {
+          const prog = await fetch(`/api/train/jobs/${encodeURIComponent(jobId)}`)
+            .then((r) => r.json())
+            .catch(() => ({}));
+          const status = prog.status || "running";
+          const pct = Number(prog.pct || 0);
+          const etaText = prog.eta_sec != null
+            ? fmtEta(prog.eta_sec)
+            : (pct < 2 ? "estimating…" : `${Math.round(prog.elapsed_sec || 0)}s elapsed`);
+          const cur = prog.current != null ? prog.current : null;
+          const tot = prog.total != null ? prog.total : null;
+          const mediaBit = (cur != null && tot != null)
+            ? ` · ${cur}s / ${tot}s encoded`
+            : "";
+          setJobProgress("publish", {
+            active: true,
+            pct,
+            label: (prog.message || "Trimming…") + mediaBit,
+            eta: etaText,
+            indeterminate: pct < 1 && status === "running",
+          });
+          selectionHint.textContent = prog.message
+            ? `${prog.message}${prog.eta_sec != null ? ` · ${fmtEta(prog.eta_sec)}` : ""}`
+            : selectionHint.textContent;
+
+          if (status === "running") {
+            setTimeout(poll, 700);
+            return;
+          }
+          if (status === "failed") {
+            alert(prog.error || prog.message || "Publish failed");
+            setJobProgress("publish", { active: false, pct: 0 });
+            updateSelectionUi();
+            return;
+          }
+          if (status !== "done") {
+            // Not registered yet — keep polling briefly
+            setTimeout(poll, 500);
+            return;
+          }
+          // done
+          const clipId = prog.result_clip_id || (prog.result && prog.result.id) || "";
+          setJobProgress("publish", {
+            active: true,
+            pct: 100,
+            label: prog.message || `Ready${clipId ? " — " + clipId : ""}`,
+            eta: "",
+          });
+          selectionHint.textContent = clipId
+            ? `Publish short ready: ${clipId}`
+            : "Publish short ready.";
+          updateSelectionUi();
+          setTimeout(() => setJobProgress("publish", { active: false, pct: 0 }), 5000);
+          if (confirm(
+            clipId
+              ? `Ready short created (${clipId}). Open preview / publish desk?`
+              : "Ready short created. Open preview / publish desk?"
+          )) {
+            window.location.href = "/";
+          }
+        };
+        poll();
+      } catch (err) {
+        alert(err.message || String(err));
+        setJobProgress("publish", { active: false, pct: 0 });
+        updateSelectionUi();
+      }
+    }
+
+    function fmt(sec) {
+      if (sec == null) return "—";
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = Math.floor(sec % 60);
+      if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+      return `${m}:${String(s).padStart(2, "0")}`;
+    }
+
+    function fmtPrecise(sec) {
+      if (sec == null) return "—";
+      const m = Math.floor(Math.abs(sec) / 60);
+      const s = (Math.abs(sec) % 60).toFixed(2).padStart(5, "0");
+      return `${m}:${s}`;
+    }
+
+    function fmtDur(sec) {
+      if (sec == null || sec < 1) return "0s";
+      if (sec < 60) return `${Math.round(sec)}s`;
+      const m = Math.floor(sec / 60);
+      const s = Math.round(sec % 60);
+      return s ? `${m}m ${s}s` : `${m}m`;
+    }
+
+    function fmtEta(sec) {
+      if (sec == null || !isFinite(sec)) return "estimating…";
+      sec = Math.max(0, Math.round(sec));
+      if (sec < 5) return "almost done";
+      if (sec < 60) return `~${sec}s left`;
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return s ? `~${m}m ${s}s left` : `~${m}m left`;
+    }
+
+    const SCAN_PHASE_LABELS = {
+      starting: "Starting",
+      sampling: "Extracting frames",
+      gap_fill: "Filling gaps",
+      scoring: "Scoring frames",
+      terminal_probes: "Terminal probes",
+      start_probes: "Start probes",
+      end_probes: "End probes",
+      ml_blend: "ML classify",
+      infer: "ML classify",
+      clustering: "Clustering",
+      reanalyze: "Re-scoring",
+    };
+
+    function fmtScanEta(prog) {
+      const parts = [];
+      if (prog.eta_sec != null) parts.push(fmtEta(prog.eta_sec) + " total");
+      if (prog.eta_phase_sec != null && prog.eta_phase_sec > 3) {
+        parts.push(fmtEta(prog.eta_phase_sec) + " this phase");
+      }
+      if (prog.elapsed_sec) parts.push(`${Math.round(prog.elapsed_sec)}s elapsed`);
+      const phase = SCAN_PHASE_LABELS[prog.phase] || prog.phase;
+      if (phase && prog.status === "running") parts.unshift(phase);
+      return parts.join(" · ") || "estimating…";
+    }
+
+    function fmtBytes(n) {
+      if (n < 1024) return `${n} B`;
+      if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+      if (n < 1024 * 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+      return `${(n / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+    }
+
+    function setJobProgress(prefix, { pct, label, eta, indeterminate = false, active = true }) {
+      const wrap = document.getElementById(prefix + "Progress");
+      const fill = document.getElementById(prefix + "ProgressFill");
+      const labelEl = document.getElementById(prefix + "ProgressLabel");
+      const etaEl = document.getElementById(prefix + "ProgressEta");
+      if (!wrap) return;
+      wrap.classList.toggle("active", !!active);
+      const bar = wrap.querySelector(".job-bar");
+      if (bar) bar.classList.toggle("indeterminate", !!indeterminate && active);
+      if (labelEl && label != null) labelEl.textContent = label;
+      if (etaEl) etaEl.textContent = active ? (eta || "") : "";
+      if (fill && !indeterminate) fill.style.width = Math.max(0, Math.min(100, pct || 0)) + "%";
+      if (fill && indeterminate) fill.style.width = "35%";
+    }
+
+    function renderMlCounts(counts) {
+      const parts = ["other", "boss_hud", "you_died", "enemy_felled"].map(
+        k => `${k}: ${counts[k] || 0}`
+      );
+      const total = Object.values(counts || {}).reduce((a, b) => a + b, 0);
+      document.getElementById("mlCounts").textContent =
+        `Labeled frames ${total} · ${parts.join(" · ")}`;
+    }
+
+    function updateEdLabels() {
+      document.getElementById("edInLabel").textContent = edIn == null ? "—" : fmtPrecise(edIn);
+      document.getElementById("edOutLabel").textContent = edOut == null ? "—" : fmtPrecise(edOut);
+      const sum = document.getElementById("edSummary");
+      if (edIn != null && edOut != null && edOut > edIn) {
+        sum.innerHTML = `Clip <b>${fmtPrecise(edIn)}</b> → <b>${fmtPrecise(edOut)}</b> · <b>${fmtDur(edOut - edIn)}</b>` +
+          (editingClipId ? ` · <b>editing ${editingClipId}</b>` : "");
+      } else {
+        sum.textContent = "Keys: [ In · ] Out · \\ preview — mark boss HUD start → death/felled end";
+      }
+      document.getElementById("edSaveClip").disabled = !(currentVod && edIn != null && edOut != null && edOut > edIn);
+      document.getElementById("edSaveClip").textContent = editingClipId
+        ? "Update clip & refresh training frames"
+        : "Save clip & add training frames";
+      document.getElementById("edCancelEdit").hidden = !editingClipId;
+    }
+
+    function clearEditMode() {
+      editingClipId = null;
+      edIn = null;
+      edOut = null;
+      edPreviewLock = false;
+      document.getElementById("edNotes").value = "";
+      updateEdLabels();
+    }
+
+    async function beginEditClip(c) {
+      const vodId = c.vod_id;
+      if (vodId && vodId !== currentVod) {
+        await loadVod(vodId, { keepEdit: true });
+      }
+      editingClipId = c.id;
+      selectedClip = {
+        type: "saved",
+        id: c.id,
+        vodId: c.vod_id,
+        start: Number(c.start_sec),
+        end: Number(c.end_sec),
+        clip: c,
+      };
+      edIn = Number(c.start_sec);
+      edOut = Number(c.end_sec);
+      document.getElementById("edKind").value = c.kind || "you_died";
+      document.getElementById("edNotes").value = c.notes || "";
+      if (!editorPlayer.src || editorPlayer.src.includes("/clips/")) {
+        editorPlayer.src = `/api/label/${currentVod}/video`;
+      }
+      updateEdLabels();
+      updateSelectionUi();
+      const seek = () => { editorPlayer.currentTime = edIn; };
+      if (editorPlayer.readyState >= 1) seek();
+      else editorPlayer.addEventListener("loadedmetadata", seek, { once: true });
+      document.getElementById("edSaveStatus").textContent =
+        `Editing clip ${c.id} — adjust In/Out or label, then Update.`;
+      document.getElementById("clipMarkEditor").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      await loadManualClips();
+    }
+
+    async function loadStats() {
+      const [stats, ml] = await Promise.all([
+        fetch("/api/train/stats").then(r => r.json()).catch(() => ({})),
+        fetch("/api/train/ml/status").then(r => r.json()).catch(() => ({})),
+      ]);
+      const frames = ml.labeled_total || 0;
+      const assist = ml.model_ready
+        ? "ML assist on"
+        : frames > 0
+          ? "labels ready — optional Train"
+          : "OpenCV terminals (no ML yet)";
+      const acc = ml.model_ready && ml.config?.last_accuracy
+        ? ` · val acc ${(ml.config.last_accuracy * 100).toFixed(0)}%`
+        : "";
+      document.getElementById("statsBox").textContent =
+        `Detector: terminal-first · ${assist}${acc} · ${frames} labeled frames`;
+      renderMlCounts(ml.label_counts || {});
+      document.getElementById("scanBtn").disabled = !currentVod;
+    }
+
+    async function loadVods() {
+      let vods = [];
+      try {
+        vods = await fetch("/api/train/vods").then(r => r.json());
+      } catch (_) {
+        document.getElementById("vodList").innerHTML =
+          '<div class="hint">Could not reach API — restart the server.</div>';
+        return;
+      }
+      const box = document.getElementById("vodList");
+      if (!vods.length) {
+        box.innerHTML = '<div class="hint">No uploads yet.</div>';
+        return;
+      }
+      box.innerHTML = vods.map(v => `
+        <div class="vod-item ${v.vod_id === currentVod ? "active" : ""}" data-id="${v.vod_id}">
+          <div class="vod-row">
+            <div class="vod-main">
+              <div><strong>${v.title || v.vod_id}</strong>
+                <span class="badge ${v.scan_status || "idle"}">${v.scan_status || "idle"}</span>
+              </div>
+              <div class="hint">${v.candidate_count || 0} detections</div>
+            </div>
+            <button type="button" class="vod-del" data-del="${v.vod_id}">Delete</button>
+          </div>
+        </div>
+      `).join("");
+      box.querySelectorAll(".vod-item").forEach(el => {
+        el.onclick = (e) => {
+          if (e.target.closest("[data-del]")) return;
+          loadVod(el.dataset.id);
+        };
+      });
+      box.querySelectorAll("[data-del]").forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          if (!confirm("Delete this VOD?")) return;
+          await fetch(`/api/train/${btn.dataset.del}`, { method: "DELETE" });
+          if (currentVod === btn.dataset.del) {
+            currentVod = null;
+            store = null;
+            editorPlayer.removeAttribute("src");
+            document.getElementById("clipEditorVodLabel").textContent = "Upload or select a VOD to start editing.";
+            document.getElementById("scanBtn").disabled = true;
+            await loadManualClips();
+          }
+          await loadVods();
+        };
+      });
+    }
+
+    async function loadVod(vodId, { keepEdit = false } = {}) {
+      currentVod = vodId;
+      botDetectPage = 0;
+      const data = await fetch(`/api/train/${vodId}`).then(r => r.json());
+      store = data.store;
+      scan = data.scan;
+      document.getElementById("clipEditorVodLabel").textContent =
+        `${store.title || vodId} (${vodId})`;
+      document.getElementById("scanBadge").textContent = store.scan_status || "idle";
+      document.getElementById("scanBadge").className = `badge ${store.scan_status || "idle"}`;
+      editorPlayer.src = data.video_url;
+      if (!keepEdit) clearEditMode();
+      updateEdLabels();
+      await loadManualClips();
+      renderBotDetections();
+      await loadVods();
+      await loadStats();
+      if (store.scan_status === "scanning") pollScan();
+    }
+
+    function updateSelectionUi() {
+      const has = !!selectedClip;
+      selJumpBtn.disabled = !has;
+      selPublishBtn.disabled = !has;
+      selEditBtn.disabled = !(has && selectedClip.type === "saved");
+      selDeleteBtn.disabled = !(has && selectedClip.type === "saved");
+      if (!has) {
+        selectionHint.textContent = "Select a saved or found clip below to preview it here.";
+        return;
+      }
+      if (selectedClip.type === "saved") {
+        selectionHint.textContent =
+          `Selected saved clip ${fmt(selectedClip.start)} → ${fmt(selectedClip.end)}. Edit loads marks; Jump replays; Delete removes training labels.`;
+      } else {
+        selectionHint.textContent =
+          `Selected found clip ${fmt(selectedClip.start)} → ${fmt(selectedClip.end)}. Jump replays · Publish exports a short. (Edit/Delete are for saved labels.)`;
+      }
+    }
+
+    function clearListSelectionHighlight() {
+      document.querySelectorAll(".clip-row.active").forEach((el) => el.classList.remove("active"));
+    }
+
+    async function previewSelection(sel, { autoplay = true } = {}) {
+      if (!sel) return;
+      const vodId = sel.vodId;
+      if (!vodId) return;
+      if (vodId !== currentVod) {
+        await loadVod(vodId, { keepEdit: true });
+      }
+      if (editorPlayer.src.includes("/clips/")) {
+        editorPlayer.src = `/api/label/${vodId}/video`;
+      }
+      edIn = Number(sel.start);
+      edOut = Number(sel.end);
+      updateEdLabels();
+      edPreviewLock = true;
+      const seek = () => {
+        editorPlayer.currentTime = edIn;
+        if (autoplay) editorPlayer.play().catch(() => {});
+      };
+      if (editorPlayer.readyState >= 1) seek();
+      else editorPlayer.addEventListener("loadedmetadata", seek, { once: true });
+    }
+
+    async function selectSavedClip(clip, { preview = true } = {}) {
+      selectedClip = {
+        type: "saved",
+        id: clip.id,
+        vodId: clip.vod_id,
+        start: Number(clip.start_sec),
+        end: Number(clip.end_sec),
+        clip,
+      };
+      clearListSelectionHighlight();
+      const row = document.querySelector(`.clip-row.saved-row[data-id="${clip.id}"]`);
+      if (row) row.classList.add("active");
+      updateSelectionUi();
+      if (preview) await previewSelection(selectedClip);
+    }
+
+    async function selectFoundClip(cand, indexLabel, { preview = true } = {}) {
+      selectedClip = {
+        type: "found",
+        id: `found-${cand.start_sec}-${cand.end_sec}`,
+        vodId: currentVod,
+        start: Number(cand.start_sec),
+        end: Number(cand.end_sec),
+        indexLabel,
+        cand,
+      };
+      clearListSelectionHighlight();
+      const row = document.querySelector(
+        `.clip-row.bot-det[data-start="${cand.start_sec}"][data-end="${cand.end_sec}"]`
+      );
+      if (row) row.classList.add("active");
+      updateSelectionUi();
+      if (preview) await previewSelection(selectedClip);
+    }
+
+    function renderBotDetections() {
+      const box = document.getElementById("botDetectList");
+      const countEl = document.getElementById("botDetectCount");
+      const cands = ((scan && scan.candidates) || [])
+        .slice()
+        .sort((a, b) => a.start_sec - b.start_sec);
+      if (countEl) countEl.textContent = `${cands.length} found`;
+      if (!cands.length) {
+        box.innerHTML = `<div class="hint" style="padding:0.65rem;">${
+          store?.scan_status === "done"
+            ? "Scan finished but found 0 attempts. Label missed YOU DIED/FELLED clips and re-scan, or add Not-a-fight if false positives."
+            : "No scan yet — select a VOD and click Scan VOD for attempts."
+        }</div>`;
+        updatePager("botDetectPager", "botDetectPageLabel", {
+          page: 0, pages: 1, total: 0, items: [], startIndex: 0,
+        }, "botDetectPrev", "botDetectNext");
+        if (selectedClip?.type === "found") {
+          selectedClip = null;
+          updateSelectionUi();
+        }
+        return;
+      }
+      const pageInfo = pageSlice(cands, botDetectPage);
+      botDetectPage = pageInfo.page;
+      updatePager("botDetectPager", "botDetectPageLabel", pageInfo, "botDetectPrev", "botDetectNext");
+      box.innerHTML = pageInfo.items.map((c, i) => {
+        const idx = pageInfo.startIndex + i + 1;
+        const endKind = c.signals?.ml_end_kind
+          || (c.had_death_screen ? "you_died" : c.had_victory_screen ? "enemy_felled" : "attempt");
+        const conf = Math.round((c.confidence || 0) * 100);
+        const reason = (c.reason || "").replace(/</g, "&lt;");
+        const isActive =
+          selectedClip?.type === "found"
+          && Number(selectedClip.start) === Number(c.start_sec)
+          && Number(selectedClip.end) === Number(c.end_sec);
+        return `
+          <div class="clip-row bot-det ${isActive ? "active" : ""}" data-start="${c.start_sec}" data-end="${c.end_sec}" data-idx="${idx}">
+            <div class="clip-row-main">
+              <div class="clip-row-title">#${idx} · ${fmt(c.start_sec)} → ${fmt(c.end_sec)}</div>
+              <div class="clip-row-sub">${fmtDur(c.end_sec - c.start_sec)} · ${conf}% · ${endKind}${reason ? " · " + reason : ""}</div>
+            </div>
+          </div>`;
+      }).join("");
+
+      box.querySelectorAll(".bot-det").forEach((row, i) => {
+        const cand = pageInfo.items[i];
+        row.onclick = () => selectFoundClip(cand, row.dataset.idx);
+      });
+    }
+
+    function renderSavedClipsPage() {
+      const box = document.getElementById("edClipList");
+      const countEl = document.getElementById("savedClipsCount");
+      const clips = savedClipsCache;
+      if (countEl) countEl.textContent = `${clips.length} saved`;
+      if (!clips.length) {
+        box.innerHTML = '<div class="hint" style="padding:0.65rem;">No clips saved yet — mark In/Out and save.</div>';
+        updatePager("savedClipsPager", "savedClipsPageLabel", {
+          page: 0, pages: 1, total: 0, items: [], startIndex: 0,
+        }, "savedClipsPrev", "savedClipsNext");
+        if (selectedClip?.type === "saved") {
+          selectedClip = null;
+          updateSelectionUi();
+        }
+        return;
+      }
+      const kindLabel = {
+        you_died: "YOU DIED",
+        enemy_felled: "ENEMY FELLED",
+        incomplete: "in progress",
+        not_fight: "not a fight",
+      };
+      const pageInfo = pageSlice(clips, savedClipsPage);
+      savedClipsPage = pageInfo.page;
+      updatePager("savedClipsPager", "savedClipsPageLabel", pageInfo, "savedClipsPrev", "savedClipsNext");
+      const byId = Object.fromEntries(clips.map(c => [c.id, c]));
+      box.innerHTML = pageInfo.items.map(c => {
+        const onThis = currentVod && c.vod_id === currentVod;
+        const notes = (c.notes || "").replace(/</g, "&lt;");
+        const isActive =
+          selectedClip?.type === "saved" && selectedClip.id === c.id
+          || editingClipId === c.id;
+        return `
+          <div class="clip-row saved-row ${isActive ? "active" : ""}" data-id="${c.id}">
+            <div class="clip-row-main">
+              <div class="clip-row-title">${fmt(c.start_sec)} → ${fmt(c.end_sec)} · ${kindLabel[c.kind] || c.kind}</div>
+              <div class="clip-row-sub">${onThis ? "this VOD" : `VOD ${c.vod_id}`} · ${c.frame_labels || 0} frames${notes ? " · " + notes : ""}</div>
+            </div>
+          </div>`;
+      }).join("");
+
+      box.querySelectorAll(".saved-row").forEach(row => {
+        row.onclick = () => {
+          const c = byId[row.dataset.id];
+          if (c) selectSavedClip(c);
+        };
+      });
+    }
+
+    async function loadManualClips() {
+      const box = document.getElementById("edClipList");
+      const countEl = document.getElementById("savedClipsCount");
+      try {
+        const data = await fetch("/api/train/clips").then(r => r.json());
+        savedClipsCache = data.clips || [];
+        const maxPage = Math.max(0, Math.ceil(savedClipsCache.length / CLIP_PAGE_SIZE) - 1);
+        if (savedClipsPage > maxPage) savedClipsPage = maxPage;
+        if (selectedClip?.type === "saved") {
+          const still = savedClipsCache.find(c => c.id === selectedClip.id);
+          if (still) selectedClip.clip = still;
+          else {
+            selectedClip = null;
+            updateSelectionUi();
+          }
+        }
+        renderSavedClipsPage();
+      } catch (_) {
+        savedClipsCache = [];
+        if (countEl) countEl.textContent = "—";
+        box.innerHTML = '<div class="hint" style="padding:0.65rem;">Could not load clips.</div>';
+        updatePager("savedClipsPager", "savedClipsPageLabel", {
+          page: 0, pages: 1, total: 0, items: [], startIndex: 0,
+        }, "savedClipsPrev", "savedClipsNext");
+      }
+    }
+
+    selEditBtn.onclick = () => {
+      if (!selectedClip || selectedClip.type !== "saved" || !selectedClip.clip) return;
+      beginEditClip(selectedClip.clip);
+    };
+    selJumpBtn.onclick = async () => {
+      if (!selectedClip) return;
+      await previewSelection(selectedClip, { autoplay: true });
+    };
+    selPublishBtn.onclick = async () => {
+      if (!selectedClip) return;
+      await publishWindow(
+        selectedClip.vodId,
+        selectedClip.start,
+        selectedClip.end,
+        `Boss fight ${fmt(selectedClip.start)}`
+      );
+    };
+    selDeleteBtn.onclick = async () => {
+      if (!selectedClip || selectedClip.type !== "saved" || !selectedClip.clip) return;
+      const c = selectedClip.clip;
+      if (!confirm("Delete this clip and its training frames?")) return;
+      const res = await fetch(`/api/train/${c.vod_id}/clips/${c.id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (editingClipId === c.id) clearEditMode();
+      selectedClip = null;
+      updateSelectionUi();
+      if (data.label_counts) renderMlCounts(data.label_counts);
+      await loadManualClips();
+      await loadStats();
+    };
+
+    document.getElementById("savedClipsPrev").onclick = () => {
+      if (savedClipsPage > 0) {
+        savedClipsPage -= 1;
+        renderSavedClipsPage();
+      }
+    };
+    document.getElementById("savedClipsNext").onclick = () => {
+      savedClipsPage += 1;
+      renderSavedClipsPage();
+    };
+    document.getElementById("botDetectPrev").onclick = () => {
+      if (botDetectPage > 0) {
+        botDetectPage -= 1;
+        renderBotDetections();
+      }
+    };
+    document.getElementById("botDetectNext").onclick = () => {
+      botDetectPage += 1;
+      renderBotDetections();
+    };
+
+    updateSelectionUi();
+
+    document.getElementById("edMarkIn").onclick = () => {
+      edIn = editorPlayer.currentTime;
+      if (edOut != null && edOut <= edIn) edOut = null;
+      updateEdLabels();
+    };
+    document.getElementById("edMarkOut").onclick = () => {
+      edOut = editorPlayer.currentTime;
+      if (edIn != null && edOut <= edIn) {
+        const t = edIn; edIn = edOut; edOut = t;
+      }
+      updateEdLabels();
+    };
+    document.getElementById("edSeekIn").onclick = () => { if (edIn != null) editorPlayer.currentTime = edIn; };
+    document.getElementById("edSeekOut").onclick = () => { if (edOut != null) editorPlayer.currentTime = edOut; };
+    document.getElementById("edClearMarks").onclick = () => {
+      edIn = null; edOut = null; edPreviewLock = false; updateEdLabels();
+    };
+    document.getElementById("edNudgeInBack").onclick = () => {
+      if (edIn == null) return;
+      edIn = Math.max(0, edIn - 1); updateEdLabels();
+    };
+    document.getElementById("edNudgeInFwd").onclick = () => {
+      if (edIn == null) return;
+      edIn += 1;
+      if (edOut != null && edIn >= edOut) edIn = edOut - 0.5;
+      updateEdLabels();
+    };
+    document.getElementById("edNudgeOutBack").onclick = () => {
+      if (edOut == null) return;
+      edOut -= 1;
+      if (edIn != null && edOut <= edIn) edOut = edIn + 0.5;
+      updateEdLabels();
+    };
+    document.getElementById("edNudgeOutFwd").onclick = () => {
+      if (edOut == null) return;
+      edOut += 1; updateEdLabels();
+    };
+    document.getElementById("edPlayRange").onclick = () => {
+      if (edIn == null || edOut == null || edOut <= edIn) return alert("Mark In and Out first");
+      if (currentVod && editorPlayer.src.includes("/clips/")) {
+        editorPlayer.src = `/api/label/${currentVod}/video`;
+      }
+      edPreviewLock = true;
+      editorPlayer.currentTime = edIn;
+      editorPlayer.play().catch(() => {});
+    };
+    editorPlayer.addEventListener("timeupdate", () => {
+      if (!edPreviewLock || edOut == null) return;
+      if (editorPlayer.currentTime >= edOut) {
+        editorPlayer.pause();
+        edPreviewLock = false;
+      }
+    });
+
+    document.getElementById("edCancelEdit").onclick = () => {
+      clearEditMode();
+      document.getElementById("edSaveStatus").textContent = "Edit cancelled.";
+      if (currentVod) loadManualClips();
+    };
+
+    document.getElementById("edSaveClip").onclick = async () => {
+      if (!currentVod || edIn == null || edOut == null || edOut <= edIn) return;
+      const btn = document.getElementById("edSaveClip");
+      const status = document.getElementById("edSaveStatus");
+      const isEdit = !!editingClipId;
+      btn.disabled = true;
+      setJobProgress("edSave", {
+        active: true, pct: 15,
+        label: isEdit ? "Updating clip & frames…" : "Extracting clip & frames…",
+        eta: "this can take a minute", indeterminate: true,
+      });
+      status.textContent = isEdit ? "Updating…" : "Saving…";
+      try {
+        const url = isEdit
+          ? `/api/train/${currentVod}/clips/${editingClipId}`
+          : `/api/train/${currentVod}/clips`;
+        const res = await fetch(url, {
+          method: isEdit ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            start_sec: edIn,
+            end_sec: edOut,
+            kind: document.getElementById("edKind").value,
+            notes: document.getElementById("edNotes").value.trim(),
+            extract_video: true,
+            expand_frames: true,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "save failed");
+        const added = data.frame_labels_added || 0;
+        const removed = data.frame_labels_removed || 0;
+        status.textContent = isEdit
+          ? `Updated · −${removed} / +${added} training frames`
+          : `Saved · +${added} training frames`;
+        setJobProgress("edSave", { active: true, pct: 100, label: status.textContent, eta: "" });
+        if (data.label_counts) renderMlCounts(data.label_counts);
+        clearEditMode();
+        await loadManualClips();
+        await loadStats();
+        setTimeout(() => setJobProgress("edSave", { active: false, pct: 0 }), 3500);
+      } catch (e) {
+        status.textContent = (isEdit ? "Update" : "Save") + " failed: " + (e.message || e);
+        setJobProgress("edSave", { active: false, pct: 0 });
+      } finally {
+        btn.disabled = false;
+        updateEdLabels();
+      }
+    };
+
+    function uploadWithProgress(form, onProgress) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/train/upload");
+        const t0 = performance.now();
+        xhr.upload.onprogress = (e) => {
+          if (!e.lengthComputable) return;
+          const elapsed = (performance.now() - t0) / 1000;
+          const rate = e.loaded / Math.max(0.001, elapsed);
+          const eta = (e.total - e.loaded) / Math.max(1, rate);
+          onProgress({
+            pct: (e.loaded / e.total) * 100,
+            loaded: e.loaded,
+            total: e.total,
+            eta,
+          });
+        };
+        xhr.onload = () => {
+          try {
+            const data = JSON.parse(xhr.responseText || "{}");
+            if (xhr.status >= 200 && xhr.status < 300) resolve(data);
+            else reject(new Error(data.detail || "upload failed"));
+          } catch (err) {
+            reject(err);
+          }
+        };
+        xhr.onerror = () => reject(new Error("network error"));
+        xhr.send(form);
+      });
+    }
+
+    document.getElementById("uploadBtn").onclick = async () => {
+      const file = document.getElementById("fileInput").files[0];
+      if (!file) return alert("Choose a video file");
+      const form = new FormData();
+      form.append("file", file);
+      form.append("title", document.getElementById("uploadTitle").value.trim());
+      const status = document.getElementById("uploadStatus");
+      const btn = document.getElementById("uploadBtn");
+      btn.disabled = true;
+      status.textContent = "Uploading…";
+      setJobProgress("upload", {
+        active: true, pct: 1, label: `Uploading ${file.name}…`,
+        eta: "estimating…", indeterminate: true,
+      });
+      try {
+        const data = await uploadWithProgress(form, (p) => {
+          setJobProgress("upload", {
+            active: true,
+            pct: p.pct,
+            label: `Uploading ${fmtBytes(p.loaded)} / ${fmtBytes(p.total)}`,
+            eta: fmtEta(p.eta),
+          });
+        });
+        status.textContent = "Uploaded — opening editor…";
+        setJobProgress("upload", { active: true, pct: 100, label: "Upload complete", eta: "" });
+        setTimeout(() => setJobProgress("upload", { active: false, pct: 0 }), 2000);
+        await loadVod(data.vod_id);
+      } catch (e) {
+        status.textContent = "Upload failed: " + (e.message || e);
+        setJobProgress("upload", { active: false, pct: 0 });
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    async function pollScan() {
+      if (!currentVod) return;
+      try {
+        const [vodData, prog] = await Promise.all([
+          fetch(`/api/train/${currentVod}`).then(r => r.json()),
+          fetch(`/api/train/${currentVod}/progress`).then(r => r.json()).catch(() => ({})),
+        ]);
+        store = vodData.store;
+        const status = store?.scan_status;
+        document.getElementById("scanBadge").textContent = status || "scanning";
+        document.getElementById("scanBadge").className = `badge ${status || "scanning"}`;
+        document.getElementById("scanStatus").textContent = prog.message || status || "";
+        if (status === "scanning" || prog.status === "running") {
+          setJobProgress("scan", {
+            active: true,
+            pct: prog.pct || 0,
+            label: prog.message || "Scanning…",
+            eta: fmtScanEta(prog),
+            indeterminate: (prog.pct || 0) < 1,
+          });
+          setTimeout(pollScan, 1500);
+          return;
+        }
+        setJobProgress("scan", {
+          active: true,
+          pct: 100,
+          label: prog.message || (status === "failed" ? "Scan failed" : "Scan complete"),
+          eta: "",
+        });
+        await loadVod(currentVod);
+        setTimeout(() => setJobProgress("scan", { active: false, pct: 0 }), 4000);
+      } catch (_) {
+        setTimeout(pollScan, 2500);
+      }
+    }
+
+    document.getElementById("scanBtn").onclick = async () => {
+      if (!currentVod) return;
+      document.getElementById("scanStatus").textContent = "Starting scan…";
+      setJobProgress("scan", {
+        active: true, pct: 1, label: "Starting scan…", eta: "estimating…", indeterminate: true,
+      });
+      const res = await fetch(`/api/train/${currentVod}/scan`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        document.getElementById("scanStatus").textContent = data.detail || "Scan failed";
+        setJobProgress("scan", { active: false, pct: 0 });
+        return;
+      }
+      pollScan();
+    };
+
+    document.getElementById("mericaPackBtn").onclick = async () => {
+      const btn = document.getElementById("mericaPackBtn");
+      const status = document.getElementById("mericaPackStatus");
+      btn.disabled = true;
+      status.textContent = "Importing Merica hard-neg + dual-fight labels…";
+      try {
+        const res = await fetch("/api/train/ml/pack/merica", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ force: false }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "pack failed");
+        if (data.skipped) {
+          status.textContent = data.reason || "Pack already loaded";
+        } else {
+          status.textContent =
+            `Added ${data.clips_added || 0} clips / ${data.frame_labels_added || 0} frames — train ML next`;
+        }
+        if (data.label_counts) renderMlCounts(data.label_counts);
+        await loadStats();
+      } catch (e) {
+        status.textContent = "Pack failed: " + (e.message || e);
+      }
+      btn.disabled = false;
+    };
+
+    document.getElementById("mlTrainBtn").onclick = async () => {
+      const btn = document.getElementById("mlTrainBtn");
+      const status = document.getElementById("mlTrainStatus");
+      btn.disabled = true;
+      setJobProgress("mlTrain", {
+        active: true, pct: 1, label: "Starting training…", eta: "estimating…", indeterminate: true,
+      });
+      status.textContent = "Training…";
+      try {
+        const res = await fetch("/api/train/ml/train", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ epochs: 12, min_labels: 20 }),
+        });
+        const start = await res.json();
+        if (!res.ok) throw new Error(start.detail || "train failed");
+        const jobId = start.job_id || "ml_train";
+        const poll = async () => {
+          const prog = await fetch(`/api/train/jobs/${jobId}`).then(r => r.json());
+          if (prog.status === "running") {
+            setJobProgress("mlTrain", {
+              active: true,
+              pct: prog.pct || 0,
+              label: prog.message || "Training…",
+              eta: prog.eta_sec != null ? fmtEta(prog.eta_sec) : `${Math.round(prog.elapsed_sec || 0)}s elapsed`,
+              indeterminate: (prog.pct || 0) < 1,
+            });
+            status.textContent = prog.message || "Training…";
+            setTimeout(poll, 1500);
+            return;
+          }
+          if (prog.status === "failed") {
+            status.textContent = "Failed: " + (prog.error || prog.message || "unknown");
+            setJobProgress("mlTrain", { active: true, pct: 0, label: status.textContent, eta: "" });
+            btn.disabled = false;
+            return;
+          }
+          const result = prog.result || {};
+          status.textContent = `Done — val acc ${((result.accuracy || 0) * 100).toFixed(0)}%`;
+          setJobProgress("mlTrain", { active: true, pct: 100, label: status.textContent, eta: "" });
+          await loadStats();
+          btn.disabled = false;
+          setTimeout(() => setJobProgress("mlTrain", { active: false, pct: 0 }), 5000);
+        };
+        poll();
+      } catch (e) {
+        status.textContent = "Could not start training: " + (e.message || e);
+        setJobProgress("mlTrain", { active: false, pct: 0 });
+        btn.disabled = false;
+      }
+    };
+
+    document.getElementById("retuneBtn").onclick = async () => {
+      const btn = document.getElementById("retuneBtn");
+      const box = document.getElementById("retuneBox");
+      btn.disabled = true;
+      box.hidden = false;
+      box.textContent = "Starting re-scan…";
+      setJobProgress("retune", {
+        active: true, pct: 1, label: "Starting re-scan…", eta: "estimating…", indeterminate: true,
+      });
+      try {
+        const res = await fetch("/api/train/retune", { method: "POST" });
+        const startData = await res.json();
+        if (!res.ok) throw new Error(startData.detail || "retune failed");
+        const jobId = startData.job_id || "retune";
+        const pollRetune = async () => {
+          const prog = await fetch(`/api/train/jobs/${jobId}`).then(r => r.json());
+          if (prog.status === "running") {
+            setJobProgress("retune", {
+              active: true,
+              pct: prog.pct || 0,
+              label: prog.message || "Re-scanning…",
+              eta: prog.eta_sec != null ? fmtEta(prog.eta_sec) : `${Math.round(prog.elapsed_sec || 0)}s elapsed`,
+              indeterminate: (prog.pct || 0) < 1,
+            });
+            box.textContent = prog.message || "Re-scanning…";
+            setTimeout(pollRetune, 1500);
+            return;
+          }
+          if (prog.status === "failed") {
+            box.textContent = "Failed: " + (prog.error || prog.message || "unknown");
+            setJobProgress("retune", { active: true, pct: 0, label: box.textContent, eta: "" });
+            btn.disabled = false;
+            return;
+          }
+          box.textContent = prog.message || "Re-scan complete";
+          setJobProgress("retune", { active: true, pct: 100, label: box.textContent, eta: "" });
+          if (currentVod) await loadVod(currentVod);
+          else { await loadVods(); await loadStats(); }
+          btn.disabled = false;
+          setTimeout(() => setJobProgress("retune", { active: false, pct: 0 }), 4000);
+        };
+        pollRetune();
+      } catch (e) {
+        box.textContent = "Retune failed";
+        setJobProgress("retune", { active: false, pct: 0 });
+        btn.disabled = false;
+      }
+    };
+
+    document.getElementById("refreshBtn").onclick = () => { loadVods(); loadStats(); };
+
+    // Reset / delete-all modals
+    const resetModal = document.getElementById("resetModal");
+    const resetInput = document.getElementById("resetConfirmInput");
+    const resetConfirmBtn = document.getElementById("resetConfirmBtn");
+    document.getElementById("resetBtn").onclick = () => {
+      resetInput.value = "";
+      resetConfirmBtn.disabled = true;
+      resetModal.hidden = false;
+      resetInput.focus();
+    };
+    document.getElementById("resetCancelBtn").onclick = () => { resetModal.hidden = true; };
+    resetInput.oninput = () => {
+      resetConfirmBtn.disabled = resetInput.value.trim() !== "START FRESH";
+    };
+    resetConfirmBtn.onclick = async () => {
+      resetConfirmBtn.disabled = true;
+      try {
+        const res = await fetch("/api/train/reset", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ confirm: "START FRESH" }),
+        });
+        if (!res.ok) throw new Error((await res.json()).detail || "reset failed");
+        resetModal.hidden = true;
+        currentVod = null;
+        editorPlayer.removeAttribute("src");
+        document.getElementById("clipEditorVodLabel").textContent = "Upload or select a VOD to start editing.";
+        document.getElementById("edClipList").innerHTML =
+          '<div class="hint" style="padding:0.65rem;">No clips yet.</div>';
+        const savedCount = document.getElementById("savedClipsCount");
+        if (savedCount) savedCount.textContent = "0 saved";
+        const botCount = document.getElementById("botDetectCount");
+        if (botCount) botCount.textContent = "0 found";
+        document.getElementById("botDetectList").innerHTML =
+          '<div class="hint" style="padding:0.65rem;">No scan yet — select a VOD and click Scan.</div>';
+        savedClipsCache = [];
+        savedClipsPage = 0;
+        botDetectPage = 0;
+        selectedClip = null;
+        updateSelectionUi();
+        updatePager("savedClipsPager", "savedClipsPageLabel", {
+          page: 0, pages: 1, total: 0, items: [], startIndex: 0,
+        }, "savedClipsPrev", "savedClipsNext");
+        updatePager("botDetectPager", "botDetectPageLabel", {
+          page: 0, pages: 1, total: 0, items: [], startIndex: 0,
+        }, "botDetectPrev", "botDetectNext");
+        await loadVods();
+        await loadStats();
+      } catch (e) {
+        alert(e.message || e);
+        resetConfirmBtn.disabled = false;
+      }
+    };
+
+    const delModal = document.getElementById("deleteAllModal");
+    const delInput = document.getElementById("deleteAllConfirmInput");
+    const delConfirmBtn = document.getElementById("deleteAllConfirmBtn");
+    document.getElementById("deleteAllVodsBtn").onclick = () => {
+      delInput.value = "";
+      delConfirmBtn.disabled = true;
+      delModal.hidden = false;
+      delInput.focus();
+    };
+    document.getElementById("deleteAllCancelBtn").onclick = () => { delModal.hidden = true; };
+    delInput.oninput = () => {
+      delConfirmBtn.disabled = delInput.value.trim() !== "DELETE ALL VODS";
+    };
+    delConfirmBtn.onclick = async () => {
+      delConfirmBtn.disabled = true;
+      try {
+        const res = await fetch("/api/train/vods/delete-all", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ confirm: "DELETE ALL VODS" }),
+        });
+        if (!res.ok) throw new Error((await res.json()).detail || "delete failed");
+        delModal.hidden = true;
+        currentVod = null;
+        editorPlayer.removeAttribute("src");
+        document.getElementById("clipEditorVodLabel").textContent = "Upload or select a VOD to start editing.";
+        await loadVods();
+        await loadStats();
+        await loadManualClips();
+      } catch (e) {
+        alert(e.message || e);
+        delConfirmBtn.disabled = false;
+      }
+    };
+
+    document.addEventListener("keydown", (e) => {
+      if (e.target.matches("input, textarea, select")) return;
+      if (!currentVod) return;
+      if (e.key === "[") { e.preventDefault(); document.getElementById("edMarkIn").click(); }
+      if (e.key === "]") { e.preventDefault(); document.getElementById("edMarkOut").click(); }
+      if (e.key === "\\") { e.preventDefault(); document.getElementById("edPlayRange").click(); }
+    });
+
+    updateEdLabels();
+    loadVods().then(async () => {
+      await loadStats();
+      await loadManualClips();
+      // Auto-open the VOD that already has training clips so Edit works immediately.
+      try {
+        const data = await fetch("/api/train/clips").then(r => r.json());
+        const clips = data.clips || [];
+        if (clips.length && !currentVod) {
+          await loadVod(clips[0].vod_id);
+        }
+      } catch (_) { /* ignore */ }
+    });
+  </script>
+</body>
+</html>

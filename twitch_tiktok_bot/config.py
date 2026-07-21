@@ -144,6 +144,40 @@ class WebConfig:
 
 
 @dataclass
+class YouTubePublishConfig:
+    # OAuth Desktop client JSON from Google Cloud Console (YouTube Data API v3)
+    client_secrets_file: str = "secrets/youtube_client_secret.json"
+    token_file: str = "data/youtube_token.json"
+    # Gaming
+    category_id: str = "20"
+    # private | unlisted | public — start private until you verify the upload
+    privacy_status: str = "private"
+
+
+@dataclass
+class TikTokPublishConfig:
+    client_secrets_file: str = "secrets/tiktok_client_secret.json"
+    token_file: str = "data/tiktok_token.json"
+    # Must match Login Kit Desktop redirect URI exactly
+    oauth_port: int = 8766
+
+
+@dataclass
+class InstagramPublishConfig:
+    client_secrets_file: str = "secrets/instagram_client_secret.json"
+    token_file: str = "data/instagram_token.json"
+    # Must match Meta Instagram Login OAuth redirect URI exactly
+    oauth_port: int = 8765
+
+
+@dataclass
+class PublishConfig:
+    youtube: YouTubePublishConfig = field(default_factory=YouTubePublishConfig)
+    tiktok: TikTokPublishConfig = field(default_factory=TikTokPublishConfig)
+    instagram: InstagramPublishConfig = field(default_factory=InstagramPublishConfig)
+
+
+@dataclass
 class AppConfig:
     twitch: TwitchConfig = field(default_factory=TwitchConfig)
     vod: VodConfig = field(default_factory=VodConfig)
@@ -153,6 +187,7 @@ class AppConfig:
     llm: LLMConfig = field(default_factory=LLMConfig)
     paths: PathsConfig = field(default_factory=PathsConfig)
     web: WebConfig = field(default_factory=WebConfig)
+    publish: PublishConfig = field(default_factory=PublishConfig)
     project_root: Path = field(default_factory=lambda: Path.cwd())
 
     def resolve_path(self, relative: str) -> Path:
@@ -231,6 +266,16 @@ def load_config(
     elif os.getenv(llm_raw.get("api_key_env", "OPENAI_API_KEY"), ""):
         llm_raw.setdefault("enabled", True)
 
+    publish_raw = dict(raw.get("publish", {}) or {})
+    yt_raw = dict(publish_raw.get("youtube", {}) or {})
+    tt_raw = dict(publish_raw.get("tiktok", {}) or {})
+    ig_raw = dict(publish_raw.get("instagram", {}) or {})
+    publish_cfg = PublishConfig(
+        youtube=_merge_dataclass(YouTubePublishConfig, yt_raw),
+        tiktok=_merge_dataclass(TikTokPublishConfig, tt_raw),
+        instagram=_merge_dataclass(InstagramPublishConfig, ig_raw),
+    )
+
     return AppConfig(
         twitch=_merge_dataclass(TwitchConfig, twitch_raw),
         vod=_merge_dataclass(VodConfig, raw.get("vod")),
@@ -240,5 +285,6 @@ def load_config(
         llm=_merge_dataclass(LLMConfig, llm_raw),
         paths=_merge_dataclass(PathsConfig, raw.get("paths")),
         web=_merge_dataclass(WebConfig, raw.get("web")),
+        publish=publish_cfg,
         project_root=root,
     )

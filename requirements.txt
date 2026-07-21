@@ -10,6 +10,8 @@ yt-dlp>=2024.1.0
 numpy>=1.26.0
 faster-whisper>=1.0.0
 opencv-python-headless>=4.9.0
+torch>=2.2.0
+torchvision>=0.17.0
 # CUDA libs for faster-whisper on Windows (RTX GPUs; optional if using cpu)
 nvidia-cublas-cu12>=12.0.0
 nvidia-cuda-runtime-cu12>=12.0.0
@@ -17,6 +19,7 @@ nvidia-cuda-runtime-cu12>=12.0.0
 # Web preview UI
 fastapi>=0.110.0
 uvicorn>=0.27.0
+python-multipart>=0.0.9
 
 # Optional: Twitch API
 twitchAPI>=4.0.0,<5.0.0
@@ -24,3 +27,8 @@ twitchAPI>=4.0.0,<5.0.0
 # Optional: LLM edit planning
 cursor-sdk>=0.1.0
 openai>=1.30.0
+
+# Optional: YouTube Shorts upload
+google-api-python-client>=2.120.0
+google-auth-oauthlib>=1.2.0
+google-auth-httplib2>=0.2.0

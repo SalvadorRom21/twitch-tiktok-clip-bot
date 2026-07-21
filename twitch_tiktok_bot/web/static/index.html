@@ -117,6 +117,29 @@
       text-align: center;
       padding: 3rem 1rem;
     }
+    .publish-box {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      display: grid;
+      gap: 0.75rem;
+    }
+    .publish-box h2 {
+      margin: 0;
+      font-size: 1rem;
+    }
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+    .hint { color: var(--muted); font-size: 0.8rem; line-height: 1.35; }
+    .pack-paths {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.75rem;
+      color: var(--accent-2);
+      word-break: break-all;
+    }
     @media (max-width: 960px) {
       main { grid-template-columns: 1fr; }
       .preview-grid { grid-template-columns: 1fr; }
@@ -126,11 +149,13 @@
 <body>
   <header>
     <div>
-      <h1>Twitch → TikTok Preview</h1>
-      <div class="subtitle">Review montages, tweak captions, approve before upload</div>
+      <h1>Twitch → Shorts Preview</h1>
+      <div class="subtitle">Trim, caption, export packs, upload YouTube Shorts</div>
     </div>
     <div style="display:flex;gap:0.75rem;align-items:center;">
+      <a href="/auth" style="color:var(--accent-2);text-decoration:none;font-size:0.9rem;">Auth</a>
       <a href="/label" style="color:var(--accent-2);text-decoration:none;font-size:0.9rem;">Fight labeler</a>
+      <a href="/train" style="color:var(--accent-2);text-decoration:none;font-size:0.9rem;">Elden trainer</a>
       <a href="/literacy" style="color:var(--accent-2);text-decoration:none;font-size:0.9rem;">Apex trainer</a>
       <button class="secondary" id="refreshBtn">Refresh</button>
     </div>
@@ -166,13 +191,40 @@
               <div class="meta" id="clipMeta"></div>
             </div>
             <div>
-              <label for="captionBox">Caption for TikTok</label>
+              <label for="captionBox">Caption (shared base)</label>
               <textarea id="captionBox"></textarea>
             </div>
             <div class="actions">
               <button id="saveCaptionBtn">Save caption</button>
               <button class="ok" id="approveBtn">Approve</button>
               <button class="bad" id="rejectBtn">Reject</button>
+            </div>
+            <div class="publish-box" id="publishDesk">
+              <h2>Publish desk</h2>
+              <div class="hint">Mark In/Out on the player, re-trim, then export packs for TikTok / Instagram / YouTube.</div>
+              <div class="row-2">
+                <div>
+                  <label for="trimStart">In (sec)</label>
+                  <input id="trimStart" type="number" min="0" step="0.1" value="0" />
+                </div>
+                <div>
+                  <label for="trimEnd">Out (sec)</label>
+                  <input id="trimEnd" type="number" min="0" step="0.1" value="0" />
+                </div>
+              </div>
+              <div class="actions">
+                <button class="secondary" type="button" id="markInBtn">Mark In</button>
+                <button class="secondary" type="button" id="markOutBtn">Mark Out</button>
+                <button class="secondary" type="button" id="resetTrimBtn">Reset full</button>
+                <button type="button" id="trimBtn">Re-trim clip</button>
+              </div>
+              <div class="actions">
+                <button class="ok" type="button" id="exportPackBtn">Export IG / YT / TT pack</button>
+                <button type="button" id="youtubeUploadBtn">Upload YouTube Short</button>
+                <a href="/auth" class="hint" style="align-self:center;margin-left:0.25rem;">YouTube auth →</a>
+              </div>
+              <div class="hint" id="publishStatus">Select a ready clip to enable publish tools.</div>
+              <div class="pack-paths" id="packPaths"></div>
             </div>
           </div>
         </div>
@@ -196,10 +248,52 @@
     const statusBadge = document.getElementById("statusBadge");
     const clipMeta = document.getElementById("clipMeta");
     const captionBox = document.getElementById("captionBox");
+    const trimStart = document.getElementById("trimStart");
+    const trimEnd = document.getElementById("trimEnd");
+    const publishStatus = document.getElementById("publishStatus");
+    const packPaths = document.getElementById("packPaths");
+    let clipDuration = 0;
 
     async function fetchClips() {
       const res = await fetch("/api/clips");
       return res.json();
+    }
+
+    async function fetchPublish(id) {
+      const res = await fetch(`/api/clips/${id}/publish`);
+      if (!res.ok) return null;
+      return res.json();
+    }
+
+    function setPublishBusy(busy) {
+      ["trimBtn", "exportPackBtn", "youtubeUploadBtn", "markInBtn", "markOutBtn", "resetTrimBtn"]
+        .forEach((id) => { document.getElementById(id).disabled = busy; });
+    }
+
+    async function refreshPublish(id) {
+      const data = await fetchPublish(id);
+      if (!data) {
+        publishStatus.textContent = "Publish status unavailable.";
+        return;
+      }
+      clipDuration = Number(data.duration_sec || 0);
+      if (clipDuration > 0) {
+        trimStart.value = "0";
+        trimEnd.value = clipDuration.toFixed(1);
+      }
+      const yt = data.youtube || {};
+      const up = data.youtube_upload;
+      let msg = `Duration ${clipDuration ? clipDuration.toFixed(1) + "s" : "—"}. `;
+      msg += yt.hint || "";
+      if (up && up.url) msg += ` Last YT: ${up.url}`;
+      publishStatus.textContent = msg;
+      if (data.pack_dir) {
+        packPaths.textContent = `Pack: ${data.pack_dir}`;
+      } else {
+        packPaths.textContent = "";
+      }
+      const canEdit = ["ready", "approved"].includes(data.clip?.status);
+      setPublishBusy(!canEdit);
     }
 
     async function fetchGameProfiles() {
@@ -298,6 +392,13 @@
       const caption = await fetchCaption(id);
       captionBox.value = caption.caption || "";
       document.getElementById("approveBtn").disabled = clip.status !== "ready";
+      if (clip.status === "ready" || clip.status === "approved") {
+        await refreshPublish(id);
+      } else {
+        publishStatus.textContent = "Clip must be ready before trim/export/upload.";
+        packPaths.textContent = "";
+        setPublishBusy(true);
+      }
     }
 
     async function refresh() {
@@ -354,6 +455,80 @@
     document.getElementById("rejectBtn").onclick = async () => {
       if (!selectedId) return;
       await fetch(`/api/clips/${selectedId}/reject`, { method: "POST" });
+      await refresh();
+    };
+
+    document.getElementById("markInBtn").onclick = () => {
+      trimStart.value = (player.currentTime || 0).toFixed(1);
+    };
+    document.getElementById("markOutBtn").onclick = () => {
+      trimEnd.value = (player.currentTime || 0).toFixed(1);
+    };
+    document.getElementById("resetTrimBtn").onclick = () => {
+      trimStart.value = "0";
+      trimEnd.value = clipDuration ? clipDuration.toFixed(1) : "0";
+    };
+
+    document.getElementById("trimBtn").onclick = async () => {
+      if (!selectedId) return;
+      const start_sec = Number(trimStart.value);
+      const end_sec = Number(trimEnd.value);
+      if (!(end_sec > start_sec)) return alert("Out must be after In");
+      setPublishBusy(true);
+      publishStatus.textContent = "Re-trimming…";
+      const res = await fetch(`/api/clips/${selectedId}/trim`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ start_sec, end_sec, caption: captionBox.value }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(data.detail || "Trim failed");
+        setPublishBusy(false);
+        return;
+      }
+      loadedVideoId = null;
+      await refresh();
+    };
+
+    document.getElementById("exportPackBtn").onclick = async () => {
+      if (!selectedId) return;
+      setPublishBusy(true);
+      publishStatus.textContent = "Building export packs…";
+      const res = await fetch(`/api/clips/${selectedId}/export`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ caption: captionBox.value }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(data.detail || "Export failed");
+        setPublishBusy(false);
+        return;
+      }
+      packPaths.textContent = `Pack ready: ${data.pack_dir}`;
+      publishStatus.textContent = "Export pack written for TikTok, Instagram, and YouTube. Upload TT/IG from your phone using the pack folders.";
+      setPublishBusy(false);
+    };
+
+    document.getElementById("youtubeUploadBtn").onclick = async () => {
+      if (!selectedId) return;
+      if (!confirm("Upload this short to YouTube? (privacy from config, default private)")) return;
+      setPublishBusy(true);
+      publishStatus.textContent = "Uploading to YouTube… (browser may open for Google login)";
+      const res = await fetch(`/api/clips/${selectedId}/publish/youtube`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ caption: captionBox.value }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(data.detail || "YouTube upload failed");
+        await refreshPublish(selectedId);
+        return;
+      }
+      publishStatus.textContent = `Uploaded: ${data.url || data.video_id}`;
+      packPaths.textContent = data.url || "";
       await refresh();
     };
 

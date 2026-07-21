@@ -37,6 +37,16 @@ class ClipJob:
     face_crop_center_x: float | None = None
     source_type: str = "clip"  # clip | vod
     output_videos: list[str] = field(default_factory=list)
+    # Publish desk: trim window relative to publish_master / current short
+    edit_start_sec: float | None = None
+    edit_end_sec: float | None = None
+    publish_dir: str = ""
+    youtube_video_id: str = ""
+    youtube_url: str = ""
+    # When created from an Elden trainer VOD window
+    source_vod_id: str = ""
+    source_start_sec: float | None = None
+    source_end_sec: float | None = None
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
@@ -86,6 +96,14 @@ def load_job(config: AppConfig, clip_id: str) -> ClipJob | None:
         face_crop_center_x=data.get("face_crop_center_x"),
         source_type=data.get("source_type", "clip"),
         output_videos=list(data.get("output_videos", [])),
+        edit_start_sec=data.get("edit_start_sec"),
+        edit_end_sec=data.get("edit_end_sec"),
+        publish_dir=str(data.get("publish_dir", "") or ""),
+        youtube_video_id=str(data.get("youtube_video_id", "") or ""),
+        youtube_url=str(data.get("youtube_url", "") or ""),
+        source_vod_id=str(data.get("source_vod_id", "") or ""),
+        source_start_sec=data.get("source_start_sec"),
+        source_end_sec=data.get("source_end_sec"),
     )
 
 

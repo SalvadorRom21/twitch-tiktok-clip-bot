@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fight Labeler — Twitch → TikTok</title>
+  <title>Boss Fight Labeler — Twitch → TikTok</title>
   <style>
     :root {
       --bg: #0f0f12;
@@ -167,6 +167,7 @@
     </div>
     <div>
       <a href="/">Preview</a>
+      <a href="/auth">Auth</a>
       <a href="/literacy">Apex trainer</a>
     </div>
   </header>
@@ -240,9 +241,12 @@
       </div>
 
       <div class="panel stack">
-        <label for="guide">Your fight definition (saved once per VOD)</label>
-        <textarea id="guide" placeholder="When does a fight START for you? First damage? First shot? When you push? When does it END — last knock, before rez/loot?"></textarea>
-        <button type="button" class="secondary" id="saveGuideBtn">Save guide</button>
+        <label for="guide">Your fight definition (saved once per clip/VOD)</label>
+        <textarea id="guide" placeholder="Elden Ring: START = boss health bar + white name appear (~5s before). END = GREAT ENEMY FELLED or all attempts through YOU DIED → win. NOT a boss = mobs, exploring, cutscenes."></textarea>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <button type="button" class="secondary" id="eldenPresetBtn">Elden Ring preset</button>
+          <button type="button" class="secondary" id="saveGuideBtn">Save guide</button>
+        </div>
       </div>
 
       <div class="panel stack">
@@ -428,6 +432,17 @@
       document.getElementById("notes").value = "";
       updateDraftUI();
       await loadVod(currentVod);
+    });
+
+    document.getElementById("eldenPresetBtn").addEventListener("click", () => {
+      document.getElementById("guide").value =
+        "Elden Ring boss fight: START when red boss HP bar + white name text appear at bottom of gameplay third (~5s buffer before). " +
+        "END at GREAT ENEMY FELLED / LEGEND FELLED, or include full attempt chain (YOU DIED → retry → win) as one fight. " +
+        "NOT a boss: regular mobs, exploring, cutscenes, invasions, fights without named boss bar. " +
+        "Layout: face cam top third, gameplay middle, TikTok bar bottom.";
+      document.getElementById("tags").value = "elden_ring, boss_fight";
+      document.getElementById("description").placeholder =
+        "e.g. Margit attempt 2 — bar at 0:03, died at 0:42, won at 1:28";
     });
 
     document.getElementById("saveGuideBtn").addEventListener("click", async () => {
